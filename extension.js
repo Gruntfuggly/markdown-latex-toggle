@@ -6,27 +6,30 @@ function activate( context )
 
     var markdownToLatexMappings =
     {
-        "^#\\s+(.*)$": "\\chapter{\$1}",
-        "^#{2}\\s+(.*)$": "\\section{\$1}",
-        "^#{3}\\s+(.*)$": "\\subsection{\$1}",
-        "^#{4}\\s+(.*)$": "\\subsubsection{\$1}",
-        "^#{5}\\s+(.*)$": "\\paragraph{\$1}\\hfill\\break",
-        "^\\s*\-\\s+(.*)$": "\\item{\$1}"
+        "^#\\s+(.*)$": { replacement: "\\chapter{\$1}", group: 1 },
+        "^#{2}\\s+(.*)$": { replacement: "\\section{\$1}", group: 1 },
+        "^#{3}\\s+(.*)$": { replacement: "\\subsection{\$1}", group: 1 },
+        "^#{4}\\s+(.*)$": { replacement: "\\subsubsection{\$1}", group: 1 },
+        "^#{5}\\s+(.*)$": { replacement: "\\paragraph{\$1}\\hfill\\break", group: 1 },
+        "^(\\s*)\-\\s+(.*)$": { replacement: "\\item{\$2}", group: 2, state: "itemize" },
+        "^(\\s*)\\d+\\.\\s+(.*)$": { replacement: "\\item{\$2}", group: 2, state: "enumerate" }
     };
 
     var latexToMarkdownMappings =
     {
-        "\\\\chapter\\{(.*)\\}": "# \$1",
-        "\\\\section\\{(.*)\\}": "## \$1",
-        "\\\\subsection\\{(.*)\\}": "### \$1",
-        "\\\\subsubsection\\{(.*)\\}": "#### \$1",
-        "\\\\paragraph\\{(.*)\\}\\\\hfill\\\\break": "##### \$1",
-        "\\\\item\\{(.*)\\}": "- \$1",
-        "\\\\begin\\{itemize\\}": "<REMOVE>",
-        "\\\\end\\{itemize\\}": "<REMOVE>",
+        "\\\\chapter\\{(.*)\\}": { replacement: "# \$1", group: 1 },
+        "\\\\section\\{(.*)\\}": { replacement: "## \$1", group: 1 },
+        "\\\\subsection\\{(.*)\\}": { replacement: "### \$1", group: 1 },
+        "\\\\subsubsection\\{(.*)\\}": { replacement: "#### \$1", group: 1 },
+        "\\\\paragraph\\{(.*)\\}\\\\hfill\\\\break": { replacement: "##### \$1", group: 1 },
+        "\\\\item\\{(.*)\\}": { replacements: { itemize: "- \$1", enumerate: "1. \$1" }, group: 1 },
+        "\\\\begin\\{itemize\\}": { state: "itemize" },
+        "\\\\end\\{itemize\\}": { state: "" },
+        "\\\\begin\\{enumerate\\}": { state: "enumerate" },
+        "\\\\end\\{enumerate\\}": { state: "" }
     };
 
-    context.subscriptions.push( vscode.commands.registerCommand( 'markdown-latex-toggle.markdown-to-latex', function()
+    function convert( doConversion )
     {
         var editor = vscode.window.activeTextEditor;
         var document = editor.document;
@@ -50,79 +53,126 @@ function activate( context )
             lines = lines.substring( document.offsetAt( range.start ), document.offsetAt( range.end ) );
         }
 
-        var newLines = [];
-        lines.split( "\n" ).map( function( line )
-        {
-            Object.keys( markdownToLatexMappings ).map( function( regex )
-            {
-                line = line.replace( new RegExp( regex ), markdownToLatexMappings[ regex ] );
-            } );
-            if( line.indexOf( '\\item{' ) === 0 )
-            {
-                if( inItemize === false )
-                {
-                    newLines.push( "\\begin{itemize}" );
-                }
-                inItemize = true;
-            }
-            else if( inItemize )
-            {
-                inItemize = false;
-                newLines.push( "\\end{itemize}" );
-            }
-            newLines.push( line );
-        } );
+        var newLines = doConversion( lines.split( '\n' ) );
 
         var edits = [];
         edits.push( new vscode.TextEdit( range, newLines.join( "\n" ) ) );
         var edit = new vscode.WorkspaceEdit();
         edit.set( editor.document.uri, edits );
         vscode.workspace.applyEdit( edit );
+    }
+
+    context.subscriptions.push( vscode.commands.registerCommand( 'markdown-latex-toggle.markdown-to-latex', function()
+    {
+        convert( function( lines )
+        {
+            function indentation( adjustment )
+            {
+                if( states.length > 0 )
+                {
+                    var currentLevel = states[ states.length - 1 ].level;
+                    if( currentLevel )
+                    {
+                        return " ".repeat( ( currentLevel + adjustment ) * 4 );
+                    }
+                }
+
+                return "";
+            }
+
+            var newLines = [];
+            var states = [];
+            lines.map( function( line )
+            {
+                var currentMatch;
+                Object.keys( markdownToLatexMappings ).map( function( regex )
+                {
+                    line = line.replace( new RegExp( regex ), function( match, g1, g2 )
+                    {
+                        var m = markdownToLatexMappings[ regex ];
+                        currentMatch = m;
+                        if( g2 )
+                        {
+                            currentMatch.level = 1 + g1.length / 4;
+                        }
+                        return m.replacement.replace( "\$" + m.group, m.group === 1 ? g1 : g2 );
+                    } );
+                } );
+
+                if( states.length > 0 )
+                {
+                    var currentState = states[ states.length - 1 ];
+                    while( states.length > 0 &&
+                        ( currentMatch === undefined ||
+                            ( currentMatch && currentMatch.state === undefined ) ||
+                            ( currentMatch.level < currentState.level ) ) )
+                    {
+                        newLines.push( indentation( -1 ) + "\\end{" + currentState.state + "}" );
+                        states.pop();
+                        if( states.length > 0 )
+                        {
+                            currentState = states[ states.length - 1 ];
+                        }
+                    }
+                }
+
+                if( currentMatch && currentMatch.state )
+                {
+                    var lastState = states.length > 0 ? states[ states.length - 1 ] : undefined;
+                    if( !lastState || lastState.state !== currentMatch.state || currentMatch.level > lastState.level )
+                    {
+                        newLines.push( indentation( 0 ) + "\\begin{" + currentMatch.state + "}" );
+                        states.push( { state: currentMatch.state, level: currentMatch.level } );
+                    }
+                }
+
+                newLines.push( indentation( 0 ) + line );
+            } );
+
+            return newLines;
+        } );
     } ) );
 
 
     context.subscriptions.push( vscode.commands.registerCommand( 'markdown-latex-toggle.latex-to-markdown', function()
     {
-        var editor = vscode.window.activeTextEditor;
-        var document = editor.document;
-        var selection = editor.selection;
-
-        var s = selection.start;
-        var e = selection.end;
-
-        var hasSelection = s.line !== e.line || s.character !== e.character;
-
-        var lines = document.getText();
-
-        var range = new vscode.Range( 0,
-            document.lineAt( 0 ).range.start.character,
-            document.lineCount - 1,
-            document.lineAt( document.lineCount - 1 ).range.end.character );
-
-        if( hasSelection )
+        convert( function( lines )
         {
-            range = new vscode.Range( s.line, 0, e.line, document.lineAt( e.line ).range.end.character );
-            lines = lines.substring( document.offsetAt( range.start ), document.offsetAt( range.end ) );
-        }
-
-        var newLines = [];
-        lines.split( "\n" ).map( function( line )
-        {
-            Object.keys( latexToMarkdownMappings ).map( function( regex )
+            var newLines = [];
+            var states;
+            lines.map( function( line )
             {
-                line = line.replace( new RegExp( regex ), latexToMarkdownMappings[ regex ] );
+                var currentMatch;
+                var oldLine = line;
+                Object.keys( latexToMarkdownMappings ).map( function( regex )
+                {
+                    line = line.replace( new RegExp( regex ), function( match, g1, g2 )
+                    {
+                        var m = latexToMarkdownMappings[ regex ];
+                        currentMatch = m;
+                        var replacement = m.replacements ? m.replacements[ states ] : m.replacement;
+                        return replacement ? replacement.replace( "\$" + m.group, m.group === 1 ? g1 : g2 ) : match;
+                    } );
+                } );
+                if( currentMatch && currentMatch.state )
+                {
+                    if( currentMatch.state.length > 0 )
+                    {
+                        states = currentMatch.state;
+                    }
+                    else
+                    {
+                        states = undefined;
+                    }
+                }
+                if( currentMatch === undefined || currentMatch.replacement || currentMatch.replacements )
+                {
+                    newLines.push( line );
+                }
             } );
-            if( line !== "<REMOVE>" )
-            {
-                newLines.push( line );
-            }
-        } );
 
-        var edits = [];
-        edits.push( new vscode.TextEdit( range, newLines.join( "\n" ) ) );
-        var edit = new vscode.WorkspaceEdit();
-        edit.set( editor.document.uri, edits );
-        vscode.workspace.applyEdit( edit );
+            return newLines;
+        } );
     } ) );
 }
 
