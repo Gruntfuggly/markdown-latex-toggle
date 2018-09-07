@@ -1,34 +1,8 @@
 var vscode = require( 'vscode' );
+var mappings = require( './mappings.js' );
 
 function activate( context )
 {
-    var inItemize = false;
-
-    var markdownToLatexMappings =
-    {
-        "^#\\s+(.*)$": { replacement: "\\chapter{\$1}", group: 1 },
-        "^#{2}\\s+(.*)$": { replacement: "\\section{\$1}", group: 1 },
-        "^#{3}\\s+(.*)$": { replacement: "\\subsection{\$1}", group: 1 },
-        "^#{4}\\s+(.*)$": { replacement: "\\subsubsection{\$1}", group: 1 },
-        "^#{5}\\s+(.*)$": { replacement: "\\paragraph{\$1}\\hfill\\break", group: 1 },
-        "^(\\s*)\-\\s+(.*)$": { replacement: "\\item{\$2}", group: 2, state: "itemize" },
-        "^(\\s*)\\d+\\.\\s+(.*)$": { replacement: "\\item{\$2}", group: 2, state: "enumerate" }
-    };
-
-    var latexToMarkdownMappings =
-    {
-        "\\\\chapter\\{(.*)\\}": { replacement: "# \$1", group: 1 },
-        "\\\\section\\{(.*)\\}": { replacement: "## \$1", group: 1 },
-        "\\\\subsection\\{(.*)\\}": { replacement: "### \$1", group: 1 },
-        "\\\\subsubsection\\{(.*)\\}": { replacement: "#### \$1", group: 1 },
-        "\\\\paragraph\\{(.*)\\}\\\\hfill\\\\break": { replacement: "##### \$1", group: 1 },
-        "\\\\item\\{(.*)\\}": { replacements: { itemize: "- \$1", enumerate: "1. \$1" }, group: 1 },
-        "\\\\begin\\{itemize\\}": { state: "itemize" },
-        "\\\\end\\{itemize\\}": { state: "" },
-        "\\\\begin\\{enumerate\\}": { state: "enumerate" },
-        "\\\\end\\{enumerate\\}": { state: "" }
-    };
-
     function convert( doConversion )
     {
         var editor = vscode.window.activeTextEditor;
@@ -85,17 +59,26 @@ function activate( context )
             lines.map( function( line )
             {
                 var currentMatch;
-                Object.keys( markdownToLatexMappings ).map( function( regex )
+                Object.keys( mappings.markdownToLatexMappings ).map( function( regex )
                 {
                     line = line.replace( new RegExp( regex ), function( match, g1, g2 )
                     {
-                        var m = markdownToLatexMappings[ regex ];
+                        var m = mappings.markdownToLatexMappings[ regex ];
                         currentMatch = m;
-                        if( g2 )
+                        if( g2 && g1.replace( /\s/g, '' ) === "" )
                         {
                             currentMatch.level = 1 + g1.length / 4;
                         }
-                        return m.replacement.replace( "\$" + m.group, m.group === 1 ? g1 : g2 );
+                        var updated = m.replacement ? m.replacement : match;
+                        var groups = arguments;
+                        if( m.groups )
+                        {
+                            m.groups.map( function( group )
+                            {
+                                updated = updated.replace( "\$" + group, groups[ group ] );
+                            } );
+                        }
+                        return updated;
                     } );
                 } );
 
@@ -144,14 +127,23 @@ function activate( context )
             {
                 var currentMatch;
                 var oldLine = line;
-                Object.keys( latexToMarkdownMappings ).map( function( regex )
+                Object.keys( mappings.latexToMarkdownMappings ).map( function( regex )
                 {
                     line = line.replace( new RegExp( regex ), function( match, g1, g2 )
                     {
-                        var m = latexToMarkdownMappings[ regex ];
+                        var m = mappings.latexToMarkdownMappings[ regex ];
                         currentMatch = m;
-                        var replacement = m.replacements ? m.replacements[ states ] : m.replacement;
-                        return replacement ? replacement.replace( "\$" + m.group, m.group === 1 ? g1 : g2 ) : match;
+
+                        var updated = m.replacement ? m.replacement : match;
+                        if( m.groups )
+                        {
+                            var groups = arguments;
+                            m.groups.map( function( group )
+                            {
+                                updated = updated.replace( "\$" + group, groups[ group ] );
+                            } );
+                        }
+                        return updated;
                     } );
                 } );
                 if( currentMatch && currentMatch.state )
