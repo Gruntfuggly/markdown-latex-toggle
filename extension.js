@@ -64,21 +64,31 @@ function activate( context )
                     line = line.replace( new RegExp( regex ), function( match, g1, g2 )
                     {
                         var m = mappings.markdownToLatexMappings[ regex ];
-                        currentMatch = m;
-                        if( g2 && g1.replace( /\s/g, '' ) === "" )
+                        if( !currentMatch )
                         {
-                            currentMatch.level = 1 + g1.length / 4;
-                        }
-                        var updated = m.replacement ? m.replacement : match;
-                        var groups = arguments;
-                        if( m.groups )
-                        {
-                            m.groups.map( function( group )
+                            currentMatch = m;
+                            if( g2 && g1.replace( /\s/g, '' ) === "" )
                             {
-                                updated = updated.replace( "\$" + group, groups[ group ] );
-                            } );
+                                currentMatch.level = 1 + g1.length / 4;
+                            }
+                            var updated = m.replacement ? m.replacement : match;
+                            var groups = arguments;
+                            if( m.groups )
+                            {
+                                m.groups.map( function( group )
+                                {
+                                    updated = updated.replace( "\$" + group, groups[ group ] );
+                                } );
+                            }
+                            if( m.state === "tabularx" )
+                            {
+                                currentMatch.elements = match.split( '|' ).filter( function( e ) { return e.length > 0; } );
+                                updated = currentMatch.elements.join( " & " ) + "\\\\ \\hline";
+                            }
+
+                            return updated;
                         }
-                        return updated;
+                        return match;
                     } );
                 } );
 
@@ -104,12 +114,22 @@ function activate( context )
                     var lastState = states.length > 0 ? states[ states.length - 1 ] : undefined;
                     if( !lastState || lastState.state !== currentMatch.state || currentMatch.level > lastState.level )
                     {
-                        newLines.push( indentation( 0 ) + "\\begin{" + currentMatch.state + "}" );
+                        if( currentMatch.state === "tabularx" )
+                        {
+                            newLines.push( "\\begin{tabularx}{\\textwidth}{" + ( "|X".repeat( currentMatch.elements.length ) ) + "|}\\hline" );
+                        }
+                        else
+                        {
+                            newLines.push( indentation( 0 ) + "\\begin{" + currentMatch.state + "}" );
+                        }
                         states.push( { state: currentMatch.state, level: currentMatch.level } );
                     }
                 }
 
-                newLines.push( indentation( 0 ) + line );
+                if( !currentMatch || !currentMatch.ignore )
+                {
+                    newLines.push( indentation( 0 ) + line );
+                }
             } );
 
             return newLines;

@@ -9,7 +9,9 @@ var markdownToLatexMappings =
     "^(\\s*)\\d+\\.\\s+(.*)$": { replacement: "\\item{\$2}", groups: [ 2 ], state: "enumerate" },
     "<img alt=\"(.*)\" src=\"(.*)\"></img>": { replacement: "\\begin{figure}[h]\\includegraphics[width=\\textwidth]{\$2}\\caption{\$1}\\end{figure}", groups: [ 1, 2 ] },
     "<img alt=\"(.*)\" src=\"(.*)\"/>": { replacement: "\\begin{figure}[h]\\includegraphics[width=\\textwidth]{\$2}\\caption{\$1}\\end{figure}", groups: [ 1, 2 ] },
-    "(_)": { replacement: "\\_" }
+    "(_)": { replacement: "\\_" },
+    "^\\|([:-]*\\|){1,}$": { ignore: true, state: "tabularx" },
+    "^\\|(.*\\|){1,}$": { state: "tabularx" },
 };
 
 var latexToMarkdownMappings =

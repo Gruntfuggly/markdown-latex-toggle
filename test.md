@@ -68,3 +68,9 @@ The Severity and Urgency columns show the current highest event severity and cur
         \item{Three}
 
 ### This should be OK.
+
+
+| Requirement |                                                                             | Design Reference       | Notes |
+|:------------|:----------------------------------------------------------------------------|:-----------------------|:------|
+| 1.          | Provide a GUI to view monitored data                                        | 1.7.                   |       |
+| 1.1.        | showing current data                                                        | 1.7.1., 1.7.2., 1.7.3. |       |
