@@ -22,13 +22,16 @@ var latexToMarkdownMappings =
     "\\\\subsubsection\\{(.*)\\}": { replacement: "#### \$1", groups: [ 1 ] },
     "\\\\paragraph\\{(.*)\\}\\\\hfill\\\\break": { replacement: "##### \$1", groups: [ 1 ] },
     "\\\\item\\{(.*)\\}": { replacements: { itemize: "- \$1", enumerate: "1. \$1" }, groups: [ 1 ] },
-    "\\\\begin\\{itemize\\}": { state: "itemize" },
-    "\\\\end\\{itemize\\}": { state: "" },
-    "\\\\begin\\{enumerate\\}": { state: "enumerate" },
-    "\\\\end\\{enumerate\\}": { state: "" },
+    "\\\\begin\\{itemize\\}": { ignore: true, state: "itemize" },
+    "\\\\end\\{itemize\\}": { ignore: true, state: "" },
+    "\\\\begin\\{enumerate\\}": { ignore: true, state: "enumerate" },
+    "\\\\end\\{enumerate\\}": { ignore: true, state: "" },
     "\\\\begin\\{figure\\}\\[h\\]\\\\includegraphics\\[width=\\\\textwidth\\]\\{(.*)\\}\\\\caption\\{(.*)\\}\\\\end\\{figure\\}": {
         replacement: "<img alt=\"\$2\" src=\"\$1\"/>", groups: [ 1, 2 ]
-    }
+    },
+    "\\\\begin\\{tabularx\\}\\{\\\\textwidth\\}\\{[\|Xlrx]*}\\\\hline": { ignore: true, state: "table" },
+    "(.*?&){1,}(.*)(\\\\\\\\ \\\\hline)$": { state: "table" },
+    "\\\\end\\{tabularx\\}": { ignore: true, state: "" }
 };
 
 module.exports.markdownToLatexMappings = markdownToLatexMappings;

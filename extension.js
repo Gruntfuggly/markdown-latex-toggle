@@ -163,6 +163,13 @@ function activate( context )
                                 updated = updated.replace( "\$" + group, groups[ group ] );
                             } );
                         }
+                        if( m.state === "table" )
+                        {
+                            var cells = updated.substr( 0, updated.indexOf( "\\\\ \\hline" ) );
+                            currentMatch.elements = cells.split( '&' ).filter( function( e ) { return e.length > 0; } );
+                            updated = "| " + currentMatch.elements.join( " | " ) + " |";
+                        }
+
                         return updated;
                     } );
                 } );
@@ -177,7 +184,8 @@ function activate( context )
                         states = undefined;
                     }
                 }
-                if( currentMatch === undefined || currentMatch.replacement || currentMatch.replacements )
+
+                if( !currentMatch || !currentMatch.ignore )
                 {
                     newLines.push( line );
                 }
