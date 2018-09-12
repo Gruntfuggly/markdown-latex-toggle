@@ -33,7 +33,7 @@ var latexToMarkdownMappings =
     "\\\\begin\\{figure\\}\\[h\\]\\\\includegraphics\\[width=\\\\textwidth\\]\\{(.*)\\}\\\\caption\\{(.*)\\}\\\\end\\{figure\\}": {
         replacement: "<img alt=\"\$2\" src=\"\$1\"/>", groups: [ 1, 2 ]
     },
-    "\\\\begin\\{tabularx\\}\\{\\\\textwidth\\}\\{[\|Xlrx]*}\\\\hline": { ignore: true, state: "table" },
+    "\\\\begin\\{tabularx\\}\\{\\\\textwidth\\}\\{[\|Xlrx]*}\\\\hline": { ignore: true },
     "(.*?&){1,}(.*)(\\\\\\\\ \\\\hline)$": { state: "table" },
     "\\\\end\\{tabularx\\}": { ignore: true, state: "" },
     "\\\\textit\\{(.*)\\}": { replacement: "*\$1*", groups: [ 1 ] },

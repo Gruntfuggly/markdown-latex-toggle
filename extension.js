@@ -3,6 +3,19 @@ var mappings = require( './mappings.js' );
 
 function activate( context )
 {
+    function simpleClone( object )
+    {
+        var newObject = ( object instanceof Array ) ? [] : {};
+        for( var i in object )
+        {
+            if( i == 'clone' ) continue;
+            if( object[ i ] && typeof object[ i ] == "object" )
+            {
+                newObject[ i ] = simpleClone( object[ i ] );
+            } else newObject[ i ] = object[ i ]
+        } return newObject;
+    };
+
     function convert( doConversion )
     {
         var editor = vscode.window.activeTextEditor;
@@ -63,7 +76,7 @@ function activate( context )
                 {
                     line = line.replace( new RegExp( regex ), function( match, g1, g2 )
                     {
-                        var m = mappings.markdownToLatexMappings[ regex ];
+                        var m = simpleClone( mappings.markdownToLatexMappings[ regex ] );
                         if( !currentMatch )
                         {
                             currentMatch = m;
@@ -116,7 +129,15 @@ function activate( context )
                     {
                         if( currentMatch.state === "tabularx" )
                         {
-                            newLines.push( "\\begin{tabularx}{\\textwidth}{" + ( "|X".repeat( currentMatch.elements.length ) ) + "|}\\hline" );
+                            var cells = currentMatch.elements;
+                            newLines.push( "\\begin{tabularx}{\\textwidth}{" + ( "|X".repeat( cells.length ) ) + "|}\\hline" );
+                            cells = cells.map( function( cell )
+                            {
+                                return "\\textbf{" + cell.trim() + "}";
+                            } );
+                            newLines.push( cells.join( " & " ) + "\\\\ \\hline" );
+                            currentMatch.ignore = true;
+
                         }
                         else
                         {
@@ -142,7 +163,7 @@ function activate( context )
         convert( function( lines )
         {
             var newLines = [];
-            var states;
+            var currentState;
             lines.map( function( line )
             {
                 var currentMatch;
@@ -165,9 +186,18 @@ function activate( context )
                         }
                         if( m.state === "table" )
                         {
-                            var cells = updated.substr( 0, updated.indexOf( "\\\\ \\hline" ) );
-                            currentMatch.elements = cells.split( '&' ).filter( function( e ) { return e.length > 0; } );
+                            var cells = updated.substr( 0, updated.indexOf( "\\\\ \\hline" ) ).split( '&' );
+                            cells = cells.map( function( cell )
+                            {
+                                var cell = cell.trim();
+                                return ( cell.indexOf( "\\textbf{" ) === 0 && cell.substr( -1 ) === "}" ) ? cell.substr( 8, cell.length - 9 ) : cell;
+                            } );
+                            currentMatch.elements = cells.filter( function( e ) { return e.length > 0; } );
                             updated = "| " + currentMatch.elements.join( " | " ) + " |";
+                            if( currentState !== "table" )
+                            {
+                                updated += "\n|" + ( ( "-|" ).repeat( cells.length ) );
+                            }
                         }
 
                         return updated;
@@ -177,11 +207,11 @@ function activate( context )
                 {
                     if( currentMatch.state.length > 0 )
                     {
-                        states = currentMatch.state;
+                        currentState = currentMatch.state;
                     }
                     else
                     {
-                        states = undefined;
+                        currentState = undefined;
                     }
                 }
 
