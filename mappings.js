@@ -1,5 +1,7 @@
 var markdownToLatexMappings =
 {
+    "^```(.*)$": { replacement: "\\begin{verbatim}", verbatim: true },
+    "^```$": { replacement: "\\end{verbatim}", verbatim: false },
     "^#\\s+(.*)$": { replacement: "\\chapter{\$1}", groups: [ 1 ] },
     "^#{2}\\s+(.*)$": { replacement: "\\section{\$1}", groups: [ 1 ] },
     "^#{3}\\s+(.*)$": { replacement: "\\subsection{\$1}", groups: [ 1 ] },
@@ -7,19 +9,22 @@ var markdownToLatexMappings =
     "^#{5}\\s+(.*)$": { replacement: "\\paragraph{\$1}\\hfill\\break", groups: [ 1 ] },
     "^(\\s*)\-\\s+(.*)$": { replacement: "\\item{\$2}", groups: [ 2 ], state: "itemize" },
     "^(\\s*)\\d+\\.\\s+(.*)$": { replacement: "\\item{\$2}", groups: [ 2 ], state: "enumerate" },
-    "<img alt=\"(.*)\" src=\"(.*)\"></img>": { replacement: "\\begin{figure}[h]\\includegraphics[width=\\textwidth]{\$2}\\caption{\$1}\\end{figure}", groups: [ 1, 2 ] },
-    "<img alt=\"(.*)\" src=\"(.*)\"/>": { replacement: "\\begin{figure}[h]\\includegraphics[width=\\textwidth]{\$2}\\caption{\$1}\\end{figure}", groups: [ 1, 2 ] },
-    "(_)": { replacement: "\\_" },
+    "^<img (alt|title)=\"(.*)\" src=\"(.*)\"></img>$": { replacement: "\\begin{figure}[h]\\includegraphics[width=\\textwidth]{\$3}\\caption{\$2}\\end{figure}", groups: [ 2, 3 ] },
+    "^<img (alt|title)=\"(.*)\" src=\"(.*)\"/>$": { replacement: "\\begin{figure}[h]\\includegraphics[width=\\textwidth]{\$3}\\caption{\$2}\\end{figure}", groups: [ 2, 3 ] },
+    "(_)": { replacement: "\\_", simple: true },
     "^\\|([:-]*\\|){1,}$": { ignore: true, state: "tabularx" },
     "^\\|(.*\\|){1,}$": { state: "tabularx" },
-    "\\*\\*(.*)\\*\\*": { replacement: "\\textbf{\$1}", groups: [ 1 ] },
-    "\\*(.*)\\*": { replacement: "\\textit{\$1}", groups: [ 1 ] },
+    "\\*\\*(.*?)\\*\\*": { replacement: "\\textbf{\$1}", groups: [ 1 ], simple: true },
+    "\\*(.*?)\\*": { replacement: "\\textit{\$1}", groups: [ 1 ], simple: true },
+    "\\`(.*?)\\`": { replacement: "\\texttt{\$1}", groups: [ 1 ], simple: true },
     "^---$": { replacement: "\\rule{\\textwidth}{1pt}" },
     "^===$": { replacement: "\\rule{\\textwidth}{2pt}" }
 };
 
 var latexToMarkdownMappings =
 {
+    "\\\\begin\\{verbatim\\}": { replacement: "```", verbatim: true },
+    "\\\\end\\{verbatim\\}": { replacement: "```", verbatim: false },
     "\\\\chapter\\{(.*)\\}": { replacement: "# \$1", groups: [ 1 ] },
     "\\\\section\\{(.*)\\}": { replacement: "## \$1", groups: [ 1 ] },
     "\\\\subsection\\{(.*)\\}": { replacement: "### \$1", groups: [ 1 ] },
@@ -36,8 +41,9 @@ var latexToMarkdownMappings =
     "\\\\begin\\{tabularx\\}\\{\\\\textwidth\\}\\{[\|Xlrx]*}\\\\hline": { ignore: true },
     "(.*?&){1,}(.*)(\\\\\\\\ \\\\hline)$": { state: "table" },
     "\\\\end\\{tabularx\\}": { ignore: true, state: "" },
-    "\\\\textit\\{(.*)\\}": { replacement: "*\$1*", groups: [ 1 ] },
-    "\\\\textbf\\{(.*)\\}": { replacement: "**\$1**", groups: [ 1 ] },
+    "\\\\textit\\{(.*?)\\}": { replacement: "*\$1*", groups: [ 1 ] },
+    "\\\\textbf\\{(.*?)\\}": { replacement: "**\$1**", groups: [ 1 ] },
+    "\\\\texttt\\{(.*?)\\}": { replacement: "`\$1`", groups: [ 1 ] },
     "\\\\rule\\{\\\\textwidth\\}\\{1pt\\}": { replacement: "---" },
     "\\\\rule\\{\\\\textwidth\\}\\{2pt\\}": { replacement: "===" }
 };

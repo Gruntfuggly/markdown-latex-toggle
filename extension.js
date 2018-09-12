@@ -69,36 +69,58 @@ function activate( context )
 
             var newLines = [];
             var states = [];
+            var verbatim = false;
+
             lines.map( function( line )
             {
                 var currentMatch;
                 Object.keys( mappings.markdownToLatexMappings ).map( function( regex )
                 {
-                    line = line.replace( new RegExp( regex ), function( match, g1, g2 )
+                    line = line.replace( new RegExp( regex, 'g' ), function( match, g1, g2 )
                     {
                         var m = simpleClone( mappings.markdownToLatexMappings[ regex ] );
-                        if( !currentMatch )
+                        if( !m.state || !currentMatch || m.simple )
                         {
-                            currentMatch = m;
-                            if( g1 && g2 && g1.replace( /\s/g, '' ) === "" )
+                            if( !m.simple )
                             {
-                                currentMatch.level = 1 + g1.length / 4;
-                            }
-                            var updated = m.replacement ? m.replacement : match;
-                            var groups = arguments;
-                            if( m.groups )
-                            {
-                                m.groups.map( function( group )
-                                {
-                                    updated = updated.replace( "\$" + group, groups[ group ] );
-                                } );
-                            }
-                            if( m.state === "tabularx" )
-                            {
-                                currentMatch.elements = match.split( '|' ).filter( function( e ) { return e.length > 0; } );
-                                updated = currentMatch.elements.join( " & " ) + "\\\\ \\hline";
+                                currentMatch = m;
                             }
 
+                            if( m.verbatim === false )
+                            {
+                                verbatim = false;
+                            }
+
+                            if( verbatim === false )
+                            {
+                                if( g1 && g2 && g1.replace( /\s/g, '' ) === "" )
+                                {
+                                    currentMatch.level = 1 + g1.length / 4;
+                                }
+                                var updated = m.replacement ? m.replacement : match;
+                                var groups = arguments;
+                                if( m.groups )
+                                {
+                                    m.groups.map( function( group )
+                                    {
+                                        updated = updated.replace( "\$" + group, groups[ group ] );
+                                    } );
+                                }
+                                if( m.state === "tabularx" )
+                                {
+                                    currentMatch.elements = match.split( '|' ).filter( function( e ) { return e.length > 0; } );
+                                    updated = currentMatch.elements.join( " & " ) + "\\\\ \\hline";
+                                }
+                            }
+                            else
+                            {
+                                updated = match;
+                            }
+
+                            if( m.verbatim === true )
+                            {
+                                verbatim = true;
+                            }
                             return updated;
                         }
                         return match;
@@ -164,40 +186,59 @@ function activate( context )
         {
             var newLines = [];
             var currentState;
+            var verbatim = false;
+
             lines.map( function( line )
             {
                 var currentMatch;
-                var oldLine = line;
                 Object.keys( mappings.latexToMarkdownMappings ).map( function( regex )
                 {
-                    line = line.replace( new RegExp( regex ), function( match, g1, g2 )
+                    line = line.replace( new RegExp( regex, 'g' ), function( match, g1, g2 )
                     {
                         var m = mappings.latexToMarkdownMappings[ regex ];
                         currentMatch = m;
 
-                        var updated = m.replacement ? m.replacement : match;
-                        if( m.groups )
+                        if( m.verbatim === false )
                         {
-                            var groups = arguments;
-                            m.groups.map( function( group )
-                            {
-                                updated = updated.replace( "\$" + group, groups[ group ] );
-                            } );
+                            verbatim = false;
                         }
-                        if( m.state === "table" )
+
+                        if( verbatim === false )
                         {
-                            var cells = updated.substr( 0, updated.indexOf( "\\\\ \\hline" ) ).split( '&' );
-                            cells = cells.map( function( cell )
+                            var updated = m.replacements ? m.replacements[ currentState ]
+                                : ( m.replacement ? m.replacement : match );
+
+                            if( m.groups )
                             {
-                                var cell = cell.trim();
-                                return ( cell.indexOf( "\\textbf{" ) === 0 && cell.substr( -1 ) === "}" ) ? cell.substr( 8, cell.length - 9 ) : cell;
-                            } );
-                            currentMatch.elements = cells.filter( function( e ) { return e.length > 0; } );
-                            updated = "| " + currentMatch.elements.join( " | " ) + " |";
-                            if( currentState !== "table" )
-                            {
-                                updated += "\n|" + ( ( "-|" ).repeat( cells.length ) );
+                                var groups = arguments;
+                                m.groups.map( function( group )
+                                {
+                                    updated = updated.replace( "\$" + group, groups[ group ] );
+                                } );
                             }
+                            if( m.state === "table" )
+                            {
+                                var cells = updated.substr( 0, updated.indexOf( "\\\\ \\hline" ) ).split( '&' );
+                                cells = cells.map( function( cell )
+                                {
+                                    var cell = cell.trim();
+                                    return ( cell.indexOf( "\\textbf{" ) === 0 && cell.substr( -1 ) === "}" ) ? cell.substr( 8, cell.length - 9 ) : cell;
+                                } );
+                                currentMatch.elements = cells.filter( function( e ) { return e.length > 0; } );
+                                updated = "| " + currentMatch.elements.join( " | " ) + " |";
+                                if( currentState !== "table" )
+                                {
+                                    updated += "\n|" + ( ( "-|" ).repeat( cells.length ) );
+                                }
+                            }
+                        } else
+                        {
+                            updated = match;
+                        }
+
+                        if( m.verbatim === true )
+                        {
+                            verbatim = true;
                         }
 
                         return updated;
