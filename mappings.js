@@ -3,7 +3,7 @@ var mdToLatexImgAttr = "[width=\\textwidth,height=\\textheight,keepaspectratio,t
 
 var markdownToLatexMappings =
 {
-    "^```(.*)$": { replacement: "\\begin{verbatim}", verbatim: true },
+    "^```(.*)$": { replacement: "\\begin{verbatim} %\$1", verbatim: true, groups: [ 1 ] },
     "^```$": { replacement: "\\end{verbatim}", verbatim: false },
     "^#\\s+(.*)$": { replacement: "\\chapter{\$1}", groups: [ 1 ] },
     "^#{2}\\s+(.*)$": { replacement: "\\section{\$1}", groups: [ 1 ] },
@@ -26,7 +26,7 @@ var markdownToLatexMappings =
 
 var latexToMarkdownMappings =
 {
-    "\\\\begin\\{verbatim\\}": { replacement: "```", verbatim: true },
+    "\\\\begin\\{verbatim\\} %(.*)": { replacement: "```\$1", verbatim: true, groups: [ 1 ] },
     "\\\\end\\{verbatim\\}": { replacement: "```", verbatim: false },
     "\\\\chapter\\{(.*)\\}": { replacement: "# \$1", groups: [ 1 ] },
     "\\\\section\\{(.*)\\}": { replacement: "## \$1", groups: [ 1 ] },
