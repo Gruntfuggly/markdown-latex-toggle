@@ -67,7 +67,7 @@ function activate( context )
                         if( !currentMatch )
                         {
                             currentMatch = m;
-                            if( g2 && g1.replace( /\s/g, '' ) === "" )
+                            if( g1 && g2 && g1.replace( /\s/g, '' ) === "" )
                             {
                                 currentMatch.level = 1 + g1.length / 4;
                             }

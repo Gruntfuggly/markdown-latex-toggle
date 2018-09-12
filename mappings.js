@@ -12,6 +12,10 @@ var markdownToLatexMappings =
     "(_)": { replacement: "\\_" },
     "^\\|([:-]*\\|){1,}$": { ignore: true, state: "tabularx" },
     "^\\|(.*\\|){1,}$": { state: "tabularx" },
+    "\\*\\*(.*)\\*\\*": { replacement: "\\textbf{\$1}", groups: [ 1 ] },
+    "\\*(.*)\\*": { replacement: "\\textit{\$1}", groups: [ 1 ] },
+    "^---$": { replacement: "\\rule{\\textwidth}{1pt}" },
+    "^===$": { replacement: "\\rule{\\textwidth}{2pt}" }
 };
 
 var latexToMarkdownMappings =
@@ -31,7 +35,11 @@ var latexToMarkdownMappings =
     },
     "\\\\begin\\{tabularx\\}\\{\\\\textwidth\\}\\{[\|Xlrx]*}\\\\hline": { ignore: true, state: "table" },
     "(.*?&){1,}(.*)(\\\\\\\\ \\\\hline)$": { state: "table" },
-    "\\\\end\\{tabularx\\}": { ignore: true, state: "" }
+    "\\\\end\\{tabularx\\}": { ignore: true, state: "" },
+    "\\\\textit\\{(.*)\\}": { replacement: "*\$1*", groups: [ 1 ] },
+    "\\\\textbf\\{(.*)\\}": { replacement: "**\$1**", groups: [ 1 ] },
+    "\\\\rule\\{\\\\textwidth\\}\\{1pt\\}": { replacement: "---" },
+    "\\\\rule\\{\\\\textwidth\\}\\{2pt\\}": { replacement: "===" }
 };
 
 module.exports.markdownToLatexMappings = markdownToLatexMappings;
