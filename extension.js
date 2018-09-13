@@ -2,6 +2,7 @@ var vscode = require( 'vscode' );
 var mappings = require( './mappings.js' );
 var fs = require( 'fs' );
 
+var maxTableRows = 36;
 var inPlace = false;
 
 function activate( context )
@@ -81,6 +82,7 @@ function activate( context )
             var newLines = [];
             var states = [];
             var verbatim = false;
+            var currentTable;
 
             lines.map( function( line )
             {
@@ -152,6 +154,7 @@ function activate( context )
                         {
                             currentState = states[ states.length - 1 ];
                         }
+                        currentTable = undefined;
                     }
                 }
 
@@ -163,20 +166,49 @@ function activate( context )
                         if( currentMatch.state === "tabularx" )
                         {
                             var cells = currentMatch.elements;
-                            newLines.push( "\\begin{tabularx}{\\textwidth}{" + ( "|X".repeat( cells.length ) ) + "|}\\hline" );
-                            cells = cells.map( function( cell )
+                            var widest = 0;
+                            var widestWidth = 0;
+                            cells = cells.map( function( cell, index )
                             {
+                                if( cell.length > widestWidth )
+                                {
+                                    widestWidth = cell.length;
+                                    widest = index;
+                                }
                                 return "\\textbf{" + cell.trim() + "}";
                             } );
-                            newLines.push( cells.join( " & " ) + "\\\\ \\hline" );
-                            currentMatch.ignore = true;
+                            var format = "|";
+                            cells.map( function( cell, index )
+                            {
+                                format += ( index === widest ? "X" : "l" ) + "|";
+                            } );
 
+                            currentTable = {
+                                header: "\\begin{tabularx}{\\textwidth}{" + format + "}\\hline\n" + cells.join( " & " ) + "\\\\ \\hline",
+                                rows: 1
+                            }
+                            newLines.push( currentTable.header );
+                            currentMatch.ignore = true;
                         }
                         else
                         {
                             newLines.push( indentation( 0 ) + "\\begin{" + currentMatch.state + "}" );
                         }
                         states.push( { state: currentMatch.state, level: currentMatch.level } );
+                    }
+
+                    if( currentTable )
+                    {
+                        if( currentTable.rows > maxTableRows )
+                        {
+                            newLines.push( "\\end{tabularx}" );
+                            newLines.push( currentTable.header );
+                            currentTable.rows = 1;
+                        }
+                        else
+                        {
+                            currentTable.rows++;
+                        }
                     }
                 }
 
