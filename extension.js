@@ -1,5 +1,8 @@
 var vscode = require( 'vscode' );
 var mappings = require( './mappings.js' );
+var fs = require( 'fs' );
+
+var inPlace = false;
 
 function activate( context )
 {
@@ -40,13 +43,21 @@ function activate( context )
             lines = lines.substring( document.offsetAt( range.start ), document.offsetAt( range.end ) );
         }
 
-        var newLines = doConversion( lines.split( '\n' ) );
+        var newLines = doConversion( lines.split( '\n' ) ).join( '\n' );
 
-        var edits = [];
-        edits.push( new vscode.TextEdit( range, newLines.join( "\n" ) ) );
-        var edit = new vscode.WorkspaceEdit();
-        edit.set( editor.document.uri, edits );
-        vscode.workspace.applyEdit( edit );
+        if( inPlace )
+        {
+            var edits = [];
+            edits.push( new vscode.TextEdit( range, newLines.join( "\n" ) ) );
+            var edit = new vscode.WorkspaceEdit();
+            edit.set( editor.document.uri, edits );
+            vscode.workspace.applyEdit( edit );
+        }
+        else
+        {
+            var filePath = document.uri.fsPath + ".tex";
+            fs.writeFileSync( filePath, newLines, 'utf8' );
+        }
     }
 
     context.subscriptions.push( vscode.commands.registerCommand( 'markdown-latex-toggle.markdown-to-latex', function()
