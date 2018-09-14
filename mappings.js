@@ -5,12 +5,16 @@ var markdownToLatexMappings =
 {
     "^```(.*)$": { replacement: "\\begin{verbatim} %\$1", verbatim: true, groups: [ 1 ] },
     "^```$": { replacement: "\\end{verbatim}", verbatim: false },
+    "^#\\s+([\\d\\.]+\\.)\\s+(.*)$": { replacement: "\\chapter{\$2}\\label{\$1}", groups: [ 1, 2 ] },
+    "^#{2}\\s+([\\d\\.]+\\.)\\s+(.*)$": { replacement: "\\section{\$2}\\label{\$1}", groups: [ 1, 2 ] },
+    "^#{3}\\s+([\\d\\.]+\\.)\\s+(.*)$": { replacement: "\\subsection{\$2}\\label{\$1}", groups: [ 1, 2 ] },
+    "^#{4}\\s+([\\d\\.]+\\.)\\s+(.*)$": { replacement: "\\subsubsection{\$2}\\label{\$1}", groups: [ 1, 2 ] },
+    "^#{5}\\s+([\\d\\.]+\\.)\\s+(.*)$": { replacement: "\\paragraph{\$2}\\label{\$1}\\hfill\\break", groups: [ 1, 2 ] },
     "^#\\s+(.*)$": { replacement: "\\chapter{\$1}", groups: [ 1 ] },
     "^#{2}\\s+(.*)$": { replacement: "\\section{\$1}", groups: [ 1 ] },
     "^#{3}\\s+(.*)$": { replacement: "\\subsection{\$1}", groups: [ 1 ] },
     "^#{4}\\s+(.*)$": { replacement: "\\subsubsection{\$1}", groups: [ 1 ] },
-    "^#{5}\\s+(.*)$": { replacement: "\\paragraph{\$1}\\hfill\\break", groups: [ 1 ] },
-    "^(\\s*)\-\\s+(.*)$": { replacement: "\\item{\$2}", groups: [ 2 ], state: "itemize" },
+    "^#{5}\\s+(.*)$": { replacement: "\\paragraph{\$1}\\hfill\\break", groups: [ 1 ] }, "^(\\s*)\-\\s+(.*)$": { replacement: "\\item{\$2}", groups: [ 2 ], state: "itemize" },
     "^(\\s*)\\d+\\.\\s+(.*)$": { replacement: "\\item{\$2}", groups: [ 2 ], state: "enumerate" },
     "^<img (alt|title)=\"(.*)\" src=\"(.*)\.png\"></img>$": { replacement: "\\begin{figure}[h]\\includegraphics" + mdToLatexImgAttr + "{\$3}\\caption{\$2}\\end{figure}", groups: [ 2, 3 ] },
     "^<img (alt|title)=\"(.*)\" src=\"(.*)\.png\"/>$": { replacement: "\\begin{figure}[h]\\includegraphics" + mdToLatexImgAttr + "{\$3}\\caption{\$2}\\end{figure}", groups: [ 2, 3 ] },
@@ -21,13 +25,21 @@ var markdownToLatexMappings =
     "\\*(.*?)\\*": { replacement: "\\textit{\$1}", groups: [ 1 ], simple: true },
     "\\`(.*?)\\`": { replacement: "\\texttt{\$1}", groups: [ 1 ], simple: true },
     "^---$": { replacement: "\\rule{\\textwidth}{1pt}" },
-    "^===$": { replacement: "\\rule{\\textwidth}{2pt}" }
+    "^===$": { replacement: "\\rule{\\textwidth}{2pt}" },
+    "\\[([\\d\\.]+\\.)]\\(\\)": { replacement: "\\ref{\$1}", groups: [ 1 ], simple: true },
+    "^<\\!-- text:(.*?) -->$": { replacement: "\\\$1", groups: [ 1 ], simple: true },
+    "<\\!-- break -->": { ignore: true, break: true }
 };
 
 var latexToMarkdownMappings =
 {
     "\\\\begin\\{verbatim\\} %(.*)": { replacement: "```\$1", verbatim: true, groups: [ 1 ] },
     "\\\\end\\{verbatim\\}": { replacement: "```", verbatim: false },
+    "\\\\chapter\\{(.*)\\}\\\\label\\{(.*)\\}": { replacement: "# \$2 \$1", groups: [ 1, 2 ] },
+    "\\\\section\\{(.*)\\}\\\\label\\{(.*)\\}": { replacement: "## \$2 \$1", groups: [ 1, 2 ] },
+    "\\\\subsection\\{(.*)\\}\\\\label\\{(.*)\\}": { replacement: "### \$2 \$1", groups: [ 1, 2 ] },
+    "\\\\subsubsection\\{(.*)\\}\\\\label\\{(.*)\\}": { replacement: "#### \$2 \$1", groups: [ 1, 2 ] },
+    "\\\\paragraph\\{(.*)\\}\\\\label\\{(.*)\\}\\\\hfill\\\\break": { replacement: "##### \$2 \$1", groups: [ 1, 2 ] },
     "\\\\chapter\\{(.*)\\}": { replacement: "# \$1", groups: [ 1 ] },
     "\\\\section\\{(.*)\\}": { replacement: "## \$1", groups: [ 1 ] },
     "\\\\subsection\\{(.*)\\}": { replacement: "### \$1", groups: [ 1 ] },
@@ -48,7 +60,9 @@ var latexToMarkdownMappings =
     "\\\\textbf\\{(.*?)\\}": { replacement: "**\$1**", groups: [ 1 ] },
     "\\\\texttt\\{(.*?)\\}": { replacement: "`\$1`", groups: [ 1 ] },
     "\\\\rule\\{\\\\textwidth\\}\\{1pt\\}": { replacement: "---" },
-    "\\\\rule\\{\\\\textwidth\\}\\{2pt\\}": { replacement: "===" }
+    "\\\\rule\\{\\\\textwidth\\}\\{2pt\\}": { replacement: "===" },
+    "\\\\ref\\{(.*?)\\}": { replacement: "[\$1]()", groups: [ 1 ], simple: true },
+    "\\\\(tiny|scriptsize|footnotesize|small|normalsize|large|LARGE|huge|HUGE)": { replacement: "<!-- text:\$1 -->", groups: [ 1 ], simple: true },
 };
 
 module.exports.markdownToLatexMappings = markdownToLatexMappings;
