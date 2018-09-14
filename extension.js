@@ -2,7 +2,6 @@ var vscode = require( 'vscode' );
 var mappings = require( './mappings.js' );
 var fs = require( 'fs' );
 
-var maxTableRows = 36;
 var inPlace = false;
 
 function activate( context )
@@ -92,7 +91,7 @@ function activate( context )
                     line = line.replace( new RegExp( regex, 'g' ), function( match, g1, g2 )
                     {
                         var m = simpleClone( mappings.markdownToLatexMappings[ regex ] );
-                        if( !m.state || !currentMatch || m.simple )
+                        if( !m.state || !currentMatch || m.simple || m.break )
                         {
                             if( !m.simple )
                             {
@@ -106,7 +105,7 @@ function activate( context )
 
                             if( verbatim === false )
                             {
-                                if( g1 && g2 && g1.replace( /\s/g, '' ) === "" )
+                                if( typeof ( g1 ) === "string" && g2 && g1.replace( /\s/g, '' ) === "" )
                                 {
                                     currentMatch.level = 1 + g1.length / 4;
                                 }
@@ -116,14 +115,20 @@ function activate( context )
                                 {
                                     m.groups.map( function( group )
                                     {
-                                        updated = updated.replace( "\$" + group, groups[ group ] );
+                                        updated = updated.replace( new RegExp( '\\$' + group, 'g' ), groups[ group ] );
                                     } );
                                 }
-                                if( m.state === "tabularx" )
+                                if( m.state === 'tabularx' )
                                 {
                                     currentMatch.elements = match.split( '|' ).filter( function( e ) { return e.length > 0; } );
                                     updated = currentMatch.elements.join( " & " ) + "\\\\ \\hline";
                                 }
+
+                                if( match === "<!-- break -->" )
+                                {
+                                    currentMatch.break = true;
+                                }
+
                             }
                             else
                             {
@@ -163,7 +168,7 @@ function activate( context )
                     var lastState = states.length > 0 ? states[ states.length - 1 ] : undefined;
                     if( !lastState || lastState.state !== currentMatch.state || currentMatch.level > lastState.level )
                     {
-                        if( currentMatch.state === "tabularx" )
+                        if( currentMatch.state === 'tabularx' )
                         {
                             var cells = currentMatch.elements;
                             var widest = 0;
@@ -184,8 +189,7 @@ function activate( context )
                             } );
 
                             currentTable = {
-                                header: "\\begin{tabularx}{\\textwidth}{" + format + "}\\hline\n" + cells.join( " & " ) + "\\\\ \\hline",
-                                rows: 1
+                                header: "\\begin{tabularx}{\\textwidth}{" + format + "}\\hline\\rowcolor[gray]{0.9}\n" + cells.join( " & " ) + "\\\\ \\hline"
                             }
                             newLines.push( currentTable.header );
                             currentMatch.ignore = true;
@@ -197,18 +201,11 @@ function activate( context )
                         states.push( { state: currentMatch.state, level: currentMatch.level } );
                     }
 
-                    if( currentTable )
+                    if( currentTable && currentMatch.break )
                     {
-                        if( currentTable.rows > maxTableRows )
-                        {
-                            newLines.push( "\\end{tabularx}" );
-                            newLines.push( currentTable.header );
-                            currentTable.rows = 1;
-                        }
-                        else
-                        {
-                            currentTable.rows++;
-                        }
+                        newLines.push( "\\end{tabularx}" );
+                        newLines.push( "\\pagebreak" );
+                        newLines.push( currentTable.header );
                     }
                 }
 
