@@ -20,7 +20,7 @@ function activate( context )
         } return newObject;
     };
 
-    function convert( doConversion )
+    function convert( extension, doConversion )
     {
         var editor = vscode.window.activeTextEditor;
         var document = editor.document;
@@ -49,21 +49,21 @@ function activate( context )
         if( inPlace )
         {
             var edits = [];
-            edits.push( new vscode.TextEdit( range, newLines.join( "\n" ) ) );
+            edits.push( new vscode.TextEdit( range, newLines.join( '\n' ) ) );
             var edit = new vscode.WorkspaceEdit();
             edit.set( editor.document.uri, edits );
             vscode.workspace.applyEdit( edit );
         }
         else
         {
-            var filePath = document.uri.fsPath + ".tex";
+            var filePath = document.uri.fsPath + extension;
             fs.writeFileSync( filePath, newLines, 'utf8' );
         }
     }
 
     context.subscriptions.push( vscode.commands.registerCommand( 'markdown-latex-toggle.markdown-to-latex', function()
     {
-        convert( function( lines )
+        convert( ".tex", function( lines )
         {
             function indentation( adjustment )
             {
@@ -225,7 +225,7 @@ function activate( context )
 
     context.subscriptions.push( vscode.commands.registerCommand( 'markdown-latex-toggle.latex-to-markdown', function()
     {
-        convert( function( lines )
+        convert( ".md", function( lines )
         {
             var newLines = [];
             var currentState;
