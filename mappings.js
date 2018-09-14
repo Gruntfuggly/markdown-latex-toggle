@@ -63,6 +63,7 @@ var latexToMarkdownMappings =
     "\\\\rule\\{\\\\textwidth\\}\\{2pt\\}": { replacement: "===" },
     "\\\\ref\\{(.*?)\\}": { replacement: "[\$1]()", groups: [ 1 ], simple: true },
     "\\\\(tiny|scriptsize|footnotesize|small|normalsize|large|LARGE|huge|HUGE)": { replacement: "<!-- text:\$1 -->", groups: [ 1 ], simple: true },
+    "\\\\pagebreak": { replacement: "<!-- break -->", simple: true }
 };
 
 module.exports.markdownToLatexMappings = markdownToLatexMappings;

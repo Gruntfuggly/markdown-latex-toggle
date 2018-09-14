@@ -201,11 +201,18 @@ function activate( context )
                         states.push( { state: currentMatch.state, level: currentMatch.level } );
                     }
 
-                    if( currentTable && currentMatch.break )
+                    if( currentMatch.break )
                     {
-                        newLines.push( "\\end{tabularx}" );
-                        newLines.push( "\\pagebreak" );
-                        newLines.push( currentTable.header );
+                        if( currentTable )
+                        {
+                            newLines.push( "\\end{tabularx}" );
+                            newLines.push( "\\pagebreak" );
+                            newLines.push( currentTable.header );
+                        }
+                        else
+                        {
+                            newLines.push( "\\pagebreak" );
+                        }
                     }
                 }
 
