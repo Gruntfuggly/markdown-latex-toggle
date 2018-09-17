@@ -80,6 +80,7 @@ function activate( context )
 
             var newLines = [];
             var states = [];
+            var codeBlock = false;
             var verbatim = false;
             var currentTable;
 
@@ -103,12 +104,16 @@ function activate( context )
                                 }
                             }
 
-                            if( m.verbatim === false )
+                            if( m.codeBlock === false )
+                            {
+                                codeBlock = false;
+                            }
+                            else if( m.latex === false )
                             {
                                 verbatim = false;
                             }
 
-                            if( verbatim === false )
+                            if( codeBlock === false && verbatim === false )
                             {
                                 if( typeof ( g1 ) === "string" && g2 && g1.replace( /\s/g, '' ) === "" )
                                 {
@@ -140,10 +145,15 @@ function activate( context )
                                 updated = match;
                             }
 
-                            if( m.verbatim === true )
+                            if( m.codeBlock === true )
+                            {
+                                codeBlock = true;
+                            }
+                            else if( m.latex === true )
                             {
                                 verbatim = true;
                             }
+
                             return updated;
                         }
                         return match;
@@ -238,7 +248,7 @@ function activate( context )
         {
             var newLines = [];
             var currentState;
-            var verbatim = false;
+            var codeBlock = false;
 
             lines.map( function( line )
             {
@@ -250,12 +260,12 @@ function activate( context )
                         var m = mappings.latexToMarkdownMappings[ regex ];
                         currentMatch = m;
 
-                        if( m.verbatim === false )
+                        if( m.codeBlock === false )
                         {
-                            verbatim = false;
+                            codeBlock = false;
                         }
 
-                        if( verbatim === false )
+                        if( codeBlock === false )
                         {
                             var updated = m.replacements ? m.replacements[ currentState ]
                                 : ( m.replacement ? m.replacement : match );
@@ -288,9 +298,9 @@ function activate( context )
                             updated = match;
                         }
 
-                        if( m.verbatim === true )
+                        if( m.codeBlock === true )
                         {
-                            verbatim = true;
+                            codeBlock = true;
                         }
 
                         return updated;
