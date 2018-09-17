@@ -117,7 +117,7 @@ function activate( context )
                             {
                                 if( typeof ( g1 ) === "string" && g2 && g1.replace( /\s/g, '' ) === "" )
                                 {
-                                    currentMatch.level = 1 + g1.length / 4;
+                                    currentMatch.level = g1.length / 4;
                                 }
                                 var updated = m.replacement ? m.replacement : match;
                                 var groups = arguments;
