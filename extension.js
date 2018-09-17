@@ -95,7 +95,12 @@ function activate( context )
                         {
                             if( !m.simple )
                             {
+                                var previousState = states.length > 0 ? states[ states.length - 1 ].state : undefined;
                                 currentMatch = m;
+                                if( m.break )
+                                {
+                                    currentMatch.state = previousState;
+                                }
                             }
 
                             if( m.verbatim === false )
@@ -159,7 +164,6 @@ function activate( context )
                         {
                             currentState = states[ states.length - 1 ];
                         }
-                        currentTable = undefined;
                     }
                 }
 
@@ -201,20 +205,21 @@ function activate( context )
                         states.push( { state: currentMatch.state, level: currentMatch.level } );
                     }
 
-                    if( currentMatch.break )
+                }
+                if( currentMatch && currentMatch.break )
+                {
+                    if( currentTable )
                     {
-                        if( currentTable )
-                        {
-                            newLines.push( "\\end{tabularx}" );
-                            newLines.push( "\\pagebreak" );
-                            newLines.push( currentTable.header );
-                        }
-                        else
-                        {
-                            newLines.push( "\\pagebreak" );
-                        }
+                        newLines.push( "\\end{tabularx}" );
+                        newLines.push( "\\pagebreak" );
+                        newLines.push( currentTable.header );
+                    }
+                    else
+                    {
+                        newLines.push( "\\pagebreak" );
                     }
                 }
+
 
                 if( !currentMatch || !currentMatch.ignore )
                 {
