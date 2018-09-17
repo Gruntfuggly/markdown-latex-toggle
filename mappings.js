@@ -7,7 +7,7 @@ var markdownToLatexMappings =
     "^<\\!-- latex:end -->$": { replacement: "% latex:end", latex: false },
     "^<\\!-- text:(.*?) -->$": { replacement: "\\\$1", groups: [ 1 ], simple: true },
     "<\\!-- break -->": { ignore: true, break: true },
-    "^```(.*)$": { replacement: "\\begin{verbatim} %\$1", verbatim: true, groups: [ 1 ] },
+    "^```(.+)$": { replacement: "\\begin{verbatim} %\$1", verbatim: true, groups: [ 1 ] },
     "^```$": { replacement: "\\end{verbatim}", verbatim: false },
     "^#\\s+([\\d\\.]+\\.)\\s+(.*)$": { replacement: "\\chapter{\$2}\\label{\$1}", groups: [ 1, 2 ] },
     "^#{2}\\s+([\\d\\.]+\\.)\\s+(.*)$": { replacement: "\\section{\$2}\\label{\$1}", groups: [ 1, 2 ] },
