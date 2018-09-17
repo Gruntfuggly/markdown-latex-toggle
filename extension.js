@@ -221,7 +221,7 @@ function activate( context )
                     if( currentTable )
                     {
                         newLines.push( "\\end{tabularx}" );
-                        newLines.push( "\\pagebreak" );
+                        newLines.push( "" );
                         newLines.push( currentTable.header );
                     }
                     else
