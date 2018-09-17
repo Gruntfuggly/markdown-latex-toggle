@@ -20,8 +20,8 @@ var markdownToLatexMappings =
     "^#{4}\\s+(.*)$": { replacement: "\\subsubsection{\$1}", groups: [ 1 ] },
     "^#{5}\\s+(.*)$": { replacement: "\\paragraph{\$1}\\hfill\\break", groups: [ 1 ] }, "^(\\s*)\-\\s+(.*)$": { replacement: "\\item{\$2}", groups: [ 2 ], state: "itemize" },
     "^(\\s*)\\d+\\.\\s+(.*)$": { replacement: "\\item{\$2}", groups: [ 2 ], state: "enumerate" },
-    "^<img (alt|title)=\"(.*)\" src=\"(.*)\.png\"></img>$": { replacement: "\\begin{figure}[h]\\includegraphics" + mdToLatexImgAttr + "{\$3}\\caption{\$2}\\end{figure}", groups: [ 2, 3 ] },
-    "^<img (alt|title)=\"(.*)\" src=\"(.*)\.png\"/>$": { replacement: "\\begin{figure}[h]\\includegraphics" + mdToLatexImgAttr + "{\$3}\\caption{\$2}\\end{figure}", groups: [ 2, 3 ] },
+    "^<img (alt|title)=\"(.*)\" src=\"(.*)\.png\"></img>$": { replacement: "\\begin{figure}[H]\\includegraphics" + mdToLatexImgAttr + "{\$3}\\caption{\$2}\\end{figure}", groups: [ 2, 3 ] },
+    "^<img (alt|title)=\"(.*)\" src=\"(.*)\.png\"/>$": { replacement: "\\begin{figure}[H]\\includegraphics" + mdToLatexImgAttr + "{\$3}\\caption{\$2}\\end{figure}", groups: [ 2, 3 ] },
     "(_)": { replacement: "\\_", simple: true },
     "^\\|([:-]*\\|){1,}$": { ignore: true, state: "tabularx" },
     "^\\|(.*\\|){1,}$": { state: "tabularx" },
@@ -54,7 +54,7 @@ var latexToMarkdownMappings =
     "\\\\end\\{itemize\\}": { ignore: true, state: "" },
     "\\\\begin\\{enumerate\\}": { ignore: true, state: "enumerate" },
     "\\\\end\\{enumerate\\}": { ignore: true, state: "" },
-    "\\\\begin\\{figure\\}\\[h\\]\\\\includegraphics\\[width=\\\\textwidth,height=\\\\textheight,keepaspectratio,type=png,ext=\\.png,read=\\.png\\]\\{(.*)\\}\\\\caption\\{(.*)\\}\\\\end\\{figure\\}": {
+    "\\\\begin\\{figure\\}\\[H\\]\\\\includegraphics\\[width=\\\\textwidth,height=\\\\textheight,keepaspectratio,type=png,ext=\\.png,read=\\.png\\]\\{(.*)\\}\\\\caption\\{(.*)\\}\\\\end\\{figure\\}": {
         replacement: "<img alt=\"\$2\" src=\"\$1.png\"/>", groups: [ 1, 2 ]
     },
     "\\\\begin\\{tabularx\\}\\{\\\\textwidth\\}\\{[\|Xlrx]*}\\\\hline": { ignore: true },
