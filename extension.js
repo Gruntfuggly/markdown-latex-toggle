@@ -96,12 +96,7 @@ function activate( context )
                         {
                             if( !m.simple )
                             {
-                                var previousState = states.length > 0 ? states[ states.length - 1 ].state : undefined;
                                 currentMatch = m;
-                                if( m.break )
-                                {
-                                    currentMatch.state = previousState;
-                                }
                             }
 
                             if( m.codeBlock === false )
@@ -119,7 +114,7 @@ function activate( context )
                                 {
                                     currentMatch.level = g1.length / 4;
                                 }
-                                var updated = m.replacement ? m.replacement : match;
+                                var updated = m.replacement !== undefined ? m.replacement : match;
                                 var groups = arguments;
                                 if( m.groups )
                                 {
@@ -134,10 +129,6 @@ function activate( context )
                                     updated = currentMatch.elements.join( " & " ) + "\\\\ \\hline";
                                 }
 
-                                if( match === "<!-- break -->" )
-                                {
-                                    currentMatch.break = true;
-                                }
 
                             }
                             else
@@ -216,12 +207,15 @@ function activate( context )
                     }
 
                 }
-                if( currentMatch && currentMatch.break )
+
+                var breakPoint = line.indexOf( "<!-- break -->" );
+
+                if( breakPoint > 0 )
                 {
                     if( currentTable )
                     {
-                        newLines.push( "\\end{tabularx}" );
-                        newLines.push( "" );
+                        newLines.push( "\\end{tabularx}\n" );
+                        newLines.push( "% break" );
                         newLines.push( currentTable.header );
                     }
                     else
@@ -230,9 +224,9 @@ function activate( context )
                     }
                 }
 
-
                 if( !currentMatch || !currentMatch.ignore )
                 {
+                    line = line.replace( new RegExp( "<\!-- .* -->", 'g' ), "" );
                     newLines.push( indentation( 0 ) + line );
                 }
             } );
@@ -268,7 +262,7 @@ function activate( context )
                         if( codeBlock === false )
                         {
                             var updated = m.replacements ? m.replacements[ currentState ]
-                                : ( m.replacement ? m.replacement : match );
+                                : ( m.replacement !== undefined ? m.replacement : match );
 
                             if( m.groups )
                             {
@@ -286,14 +280,15 @@ function activate( context )
                                     var cell = cell.trim();
                                     return ( cell.indexOf( "\\textbf{" ) === 0 && cell.substr( -1 ) === "}" ) ? cell.substr( 8, cell.length - 9 ) : cell;
                                 } );
-                                currentMatch.elements = cells.filter( function( e ) { return e.length > 0; } );
+                                currentMatch.elements = cells;
                                 updated = "| " + currentMatch.elements.join( " | " ) + " |";
                                 if( currentState !== "table" )
                                 {
                                     updated += "\n|" + ( ( "-|" ).repeat( cells.length ) );
                                 }
                             }
-                        } else
+                        }
+                        else
                         {
                             updated = match;
                         }
@@ -306,7 +301,7 @@ function activate( context )
                         return updated;
                     } );
                 } );
-                if( currentMatch && currentMatch.state )
+                if( currentMatch && currentMatch.state !== undefined )
                 {
                     if( currentMatch.state.length > 0 )
                     {

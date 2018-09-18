@@ -6,7 +6,6 @@ var markdownToLatexMappings =
     "^<\\!-- latex:begin -->$": { replacement: "% latex:begin", latex: true },
     "^<\\!-- latex:end -->$": { replacement: "% latex:end", latex: false },
     "^<\\!-- text:(.*?) -->$": { replacement: "\\\$1", groups: [ 1 ], simple: true },
-    "<\\!-- break -->": { ignore: true, break: true },
     "^```(.+)$": { replacement: "\\begin{verbatim} %\$1", verbatim: true, groups: [ 1 ] },
     "^```$": { replacement: "\\end{verbatim}", verbatim: false },
     "^#\\s+([\\d\\.]+\\.)\\s+(.*)$": { replacement: "\\chapter{\$2}\\label{\$1}", groups: [ 1, 2 ] },
@@ -67,7 +66,8 @@ var latexToMarkdownMappings =
     "\\\\rule\\{\\\\textwidth\\}\\{2pt\\}": { replacement: "===" },
     "\\\\ref\\{(.*?)\\}": { replacement: "[\$1]()", groups: [ 1 ], simple: true },
     "\\\\(tiny|scriptsize|footnotesize|small|normalsize|large|LARGE|huge|HUGE)": { replacement: "<!-- text:\$1 -->", groups: [ 1 ], simple: true },
-    "\\\\pagebreak": { replacement: "<!-- break -->", simple: true }
+    "\\\\pagebreak": { replacement: "<!-- break -->", simple: true },
+    "^\% break$": { replacement: "", simple: true, state: "" }
 };
 
 module.exports.markdownToLatexMappings = markdownToLatexMappings;
