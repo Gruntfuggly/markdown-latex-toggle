@@ -98,7 +98,7 @@ function createLatexWrapper( sourceFilename )
     var properties = parseProperties( lines );
 
     var sourceFilenameKey = "md-source-filename";
-    properties[sourceFilenameKey] = properties[sourceFilenameKey] || [ basename(sourceFilename) ];
+    properties[sourceFilenameKey] = properties[sourceFilenameKey] || [ basename(sourceFilename).replace(/ /g,'_') ];
 
     wrapperLines = compileLatexWrapper(properties);
 
