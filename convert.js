@@ -1,3 +1,4 @@
+var latexwrapper = require( './latexwrapper.js' );
 var mappings = require( './mappings.js' );
 var fs = require( 'fs' );
 
@@ -196,6 +197,8 @@ function markdownToLatex( filename )
 
         return newLines;
     } );
+
+    latexwrapper.createLatexWrapper( filename );
 };
 
 
