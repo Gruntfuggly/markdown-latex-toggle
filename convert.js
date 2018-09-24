@@ -173,7 +173,7 @@ function markdownToLatex( filename )
 
             var breakPoint = line.indexOf( "<!-- break -->" );
 
-            if( breakPoint > 0 )
+            if( breakPoint > -1 )
             {
                 if( currentTable )
                 {
