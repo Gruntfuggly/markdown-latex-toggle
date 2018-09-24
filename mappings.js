@@ -19,19 +19,21 @@ var markdownToLatexMappings =
     "^#{2}\\s+(.*)$": { replacement: "\\section{\$1}", groups: [ 1 ] },
     "^#{3}\\s+(.*)$": { replacement: "\\subsection{\$1}", groups: [ 1 ] },
     "^#{4}\\s+(.*)$": { replacement: "\\subsubsection{\$1}", groups: [ 1 ] },
-    "^#{5}\\s+(.*)$": { replacement: "\\paragraph{\$1}\\hfill\\break", groups: [ 1 ] }, "^(\\s*)\-\\s+(.*)$": { replacement: "\\item{\$2}", groups: [ 2 ], state: "itemize" },
+    "^#{5}\\s+(.*)$": { replacement: "\\paragraph{\$1}\\hfill\\break", groups: [ 1 ] }, "^(\\s*)\[-*+]\\s+(.*)$": { replacement: "\\item{\$2}", groups: [ 2 ], state: "itemize" },
     "^(\\s*)\\d+\\.\\s+(.*)$": { replacement: "\\item{\$2}", groups: [ 2 ], state: "enumerate" },
     "^<img (alt|title)=\"(.*)\" src=\"(.*)\.png\"></img>$": { replacement: "\\begin{figure}[H]\\includegraphics" + mdToLatexImgAttr + "{\$3}\\caption{\$2}\\end{figure}", groups: [ 2, 3 ] },
     "^<img (alt|title)=\"(.*)\" src=\"(.*)\.png\"/>$": { replacement: "\\begin{figure}[H]\\includegraphics" + mdToLatexImgAttr + "{\$3}\\caption{\$2}\\end{figure}", groups: [ 2, 3 ] },
-    "(_)": { replacement: "\\_", simple: true },
     "^\\|([:-]*\\|){1,}$": { ignore: true, state: "tabularx" },
     "^\\|(.*\\|){1,}$": { state: "tabularx" },
     "\\*\\*(.*?)\\*\\*": { replacement: "\\textbf{\$1}", groups: [ 1 ], simple: true },
+    "__(.*?)__": { replacement: "\\textbf{\$1}", groups: [ 1 ], simple: true },
     "\\*(.*?)\\*": { replacement: "\\textit{\$1}", groups: [ 1 ], simple: true },
+    "_(.*?)_": { replacement: "\\textit{\$1}", groups: [ 1 ], simple: true },
     "\\`(.*?)\\`": { replacement: "\\texttt{\$1}", groups: [ 1 ], simple: true },
     "^---$": { replacement: "\\rule{\\textwidth}{1pt}" },
     "^===$": { replacement: "\\rule{\\textwidth}{2pt}" },
-    "\\[([\\d\\.]+\\.)]\\(\\)": { replacement: "\\ref{\$1}", groups: [ 1 ], simple: true }
+    "\\[([\\d\\.]+\\.)]\\(\\)": { replacement: "\\ref{\$1}", groups: [ 1 ], simple: true },
+    "(_)": { replacement: "\\_", simple: true }
 };
 
 var latexToMarkdownMappings =
