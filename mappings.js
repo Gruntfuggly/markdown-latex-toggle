@@ -5,6 +5,8 @@ var markdownToLatexMappings =
 {
     "^<\\!-- latex:begin -->$": { replacement: "% latex:begin", latex: true },
     "^<\\!-- latex:end -->$": { replacement: "% latex:end", latex: false },
+    "^<\\!-- together:begin -->$": { replacement: "\\vbox{%together", simple: true },
+    "^<\\!-- together:end -->$": { replacement: "}%together", simple: true },
     "^<\\!-- text:(.*?) -->$": { replacement: "\\\$1", groups: [ 1 ], simple: true },
     "^```(.+)$": { replacement: "\\begin{verbatim} %\$1", verbatim: true, groups: [ 1 ] },
     "^```$": { replacement: "\\end{verbatim}", verbatim: false },
@@ -36,6 +38,8 @@ var latexToMarkdownMappings =
 {
     "^% latex:begin$": { replacement: "<!-- latex:begin -->" },
     "^% latex:end$": { replacement: "<!-- latex:end -->" },
+    "^\\\\vbox\\{%together$": { replacement: "<!-- together:begin -->" },
+    "^}%together$": { replacement: "<!-- together:end -->" },
     "\\\\begin\\{verbatim\\} %(.*)": { replacement: "```\$1", verbatim: true, groups: [ 1 ] },
     "\\\\end\\{verbatim\\}": { replacement: "```", verbatim: false },
     "\\\\chapter\\{(.*)\\}\\\\label\\{(.*)\\}": { replacement: "# \$2 \$1", groups: [ 1, 2 ] },
