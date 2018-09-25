@@ -33,6 +33,7 @@ var markdownToLatexMappings =
     "^---$": { replacement: "\\rule{\\textwidth}{1pt}" },
     "^===$": { replacement: "\\rule{\\textwidth}{2pt}" },
     "\\[([\\d\\.]+\\.)]\\(\\)": { replacement: "\\ref{\$1}", groups: [ 1 ], simple: true },
+    "\\[(.+?)]\\((.*?)\\)": { replacement: "\\href{\$2}{\$1}", groups: [ 1, 2 ], simple: true },
     "(_)": { replacement: "\\_", simple: true }
 };
 
@@ -71,6 +72,7 @@ var latexToMarkdownMappings =
     "\\\\rule\\{\\\\textwidth\\}\\{1pt\\}": { replacement: "---" },
     "\\\\rule\\{\\\\textwidth\\}\\{2pt\\}": { replacement: "===" },
     "\\\\ref\\{(.*?)\\}": { replacement: "[\$1]()", groups: [ 1 ], simple: true },
+    "\\\\href\\{(.*?)\\}\\{(.*?)\\}": { replacement: "[\$2](\$1)", groups: [ 1, 2 ], simple: true },
     "\\\\(tiny|scriptsize|footnotesize|small|normalsize|large|LARGE|huge|HUGE)": { replacement: "<!-- text:\$1 -->", groups: [ 1 ], simple: true },
     "\\\\pagebreak": { replacement: "<!-- break -->", simple: true },
     "^\% break$": { replacement: "", simple: true, state: "" }
