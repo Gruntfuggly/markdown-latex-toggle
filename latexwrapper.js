@@ -41,7 +41,7 @@ function parseProperties( lines )
             re = new RegExp("[\\s]*([^=]+)=[\\s]*(.*)$");
 
             groups = line.match(re);
-            console.log(groups);
+            //console.log(groups);
 
             if (groups && groups.length >= 3) {
                 key = groups[1].trim();
