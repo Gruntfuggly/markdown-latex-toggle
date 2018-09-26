@@ -54,6 +54,30 @@ suite("Extension Tests", function () {
         assert.deepEqual(actualCompiledLines, expectedCompiledLines);
     });
 
+    test("Property Compiler - line with property gets value with escaped special characters", function () {
+        line = "@@prop@@";
+        properties = { "prop": ["& % $ # _ { } \\~ ^ \\\\"] };
+
+        actualCompiledLines = pcompiler.compileLine(line, properties);
+
+        expectedCompiledLines = [
+            "\\& \\% \\$ \\# \\_ \\{ \\} \\textasciitilde \\textasciicircum \\textbackslash"
+        ];
+        assert.deepEqual(actualCompiledLines, expectedCompiledLines);
+    });
+
+    test("Property Compiler - line with property gets value with escaped per", function () {
+        line = "@@prop@@";
+        properties = { "prop": ["value & energy"] };
+
+        actualCompiledLines = pcompiler.compileLine(line, properties);
+
+        expectedCompiledLines = [
+            "value \\& energy"
+        ];
+        assert.deepEqual(actualCompiledLines, expectedCompiledLines);
+    });
+
     test("Property Compiler - unknown property", function () {
         line = "@@prop@@";
         properties = { "property": ["value"] };
@@ -242,6 +266,21 @@ suite("Extension Tests", function () {
         expectedCompiledLines = [
             "one\\textbar two & three",
             "four & five\\textbar six"
+        ];
+
+        assert.deepEqual(actualCompiledLines, expectedCompiledLines);
+    });
+
+    test("Property Compiler - convert as table - tilde to newline command", function () {
+        line = "@@prop1[]!as-table!{\\n}@@";
+        properties = {
+            "prop1": ["one|two|thr~ee"]
+        };
+
+        actualCompiledLines = pcompiler.compileLine(line, properties);
+
+        expectedCompiledLines = [
+            "one & two & thr\\newline ee"
         ];
 
         assert.deepEqual(actualCompiledLines, expectedCompiledLines);
