@@ -3,12 +3,14 @@ var mdToLatexImgAttr = "[width=\\textwidth,height=\\textheight,keepaspectratio,t
 
 var markdownToLatexMappings =
 {
-    "^<\\!-- latex:begin -->$": { replacement: "% latex:begin", latex: true },
-    "^<\\!-- latex:end -->$": { replacement: "% latex:end", latex: false },
+    "\\!properties-begin\\!": { discarding: true },
+    "\\!properties-end\\!": { discarding: false },
+    "^<\\!-- latex:begin -->$": { replacement: "% latex:begin", verbatim: true },
+    "^<\\!-- latex:end -->$": { replacement: "% latex:end", verbatim: false },
     "^<\\!-- together:begin -->$": { replacement: "\\vbox{%together", simple: true },
     "^<\\!-- together:end -->$": { replacement: "}%together", simple: true },
     "^<\\!-- text:(.*?) -->$": { replacement: "\\\$1", groups: [ 1 ], simple: true },
-    "^```(.+)$": { replacement: "\\comment{\$1}\\begin{verbatim}", verbatim: true, groups: [ 1 ] },
+    "^```(.+)$": { replacement: "\\mdcomment{$1} \\begin{verbatim}", verbatim: true, groups: [ 1 ] },
     "^```$": { replacement: "\\end{verbatim}", verbatim: false },
     "^#\\s+([\\d\\.]+\\.)\\s+(.*)$": { replacement: "\\chapter{\$2}\\label{\$1}", groups: [ 1, 2 ] },
     "^#{2}\\s+([\\d\\.]+\\.)\\s+(.*)$": { replacement: "\\section{\$2}\\label{\$1}", groups: [ 1, 2 ] },
@@ -39,11 +41,11 @@ var markdownToLatexMappings =
 
 var latexToMarkdownMappings =
 {
-    "^% latex:begin$": { replacement: "<!-- latex:begin -->" },
-    "^% latex:end$": { replacement: "<!-- latex:end -->" },
+    "^% latex:begin$": { replacement: "<!-- latex:begin -->", verbatim: true },
+    "^% latex:end$": { replacement: "<!-- latex:end -->", verbatim: true },
     "^\\\\vbox\\{%together$": { replacement: "<!-- together:begin -->" },
     "^}%together$": { replacement: "<!-- together:end -->" },
-    "\\\\comment\\{(.*)\\}\\\\begin\\{verbatim\\}": { replacement: "```\$1", verbatim: true, groups: [ 1 ] },
+    "\\\\mdcomment\\{(.*)\\} \\\\begin\\{verbatim\\}": { replacement: "```\$1", verbatim: true, groups: [ 1 ] },
     "\\\\end\\{verbatim\\}": { replacement: "```", verbatim: false },
     "\\\\chapter\\{(.*)\\}\\\\label\\{(.*)\\}": { replacement: "# \$2 \$1", groups: [ 1, 2 ] },
     "\\\\section\\{(.*)\\}\\\\label\\{(.*)\\}": { replacement: "## \$2 \$1", groups: [ 1, 2 ] },

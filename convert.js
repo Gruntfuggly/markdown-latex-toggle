@@ -1,3 +1,4 @@
+var latexwrapper = require( './latexwrapper.js' );
 var mappings = require( './mappings.js' );
 var fs = require( 'fs' );
 
@@ -17,9 +18,9 @@ function simpleClone( object )
 function convert( sourceFilename, extension, doConversion )
 {
     var lines = fs.readFileSync( sourceFilename ).toString();
-    var newLines = doConversion( lines.split( '\n' ) ).join( '\n' );
+    var newLines = doConversion( lines.split( /\r?\n/ ) ).join( '\n' );
 
-    var filePath = sourceFilename + extension;
+    var filePath = (sourceFilename + extension).replace(/ /g,'_');
     fs.writeFileSync( filePath, newLines, 'utf8' );
 };
 
@@ -43,9 +44,15 @@ function markdownToLatex( filename )
 
         var newLines = [];
         var states = [];
-        var codeBlock = false;
         var verbatim = false;
         var currentTable;
+
+        const NOTDISCARDING = 0;
+        const DISCARDING = 1;
+        const ENDDISCARDING = 2;
+
+        var discarding = NOTDISCARDING;
+
 
         lines.map( function( line )
         {
@@ -62,16 +69,17 @@ function markdownToLatex( filename )
                             currentMatch = m;
                         }
 
-                        if( m.codeBlock === false )
+                        if( m.discarding === true )
                         {
-                            codeBlock = false;
+                            discarding = DISCARDING;
                         }
-                        else if( m.latex === false )
+
+                        if( m.verbatim === false )
                         {
                             verbatim = false;
                         }
 
-                        if( codeBlock === false && verbatim === false )
+                        if( discarding === NOTDISCARDING && verbatim === false )
                         {
                             if( typeof ( g1 ) === "string" && g2 && g1.replace( /\s/g, '' ) === "" )
                             {
@@ -99,13 +107,14 @@ function markdownToLatex( filename )
                             updated = match;
                         }
 
-                        if( m.codeBlock === true )
-                        {
-                            codeBlock = true;
-                        }
-                        else if( m.latex === true )
+                        if( m.verbatim === true )
                         {
                             verbatim = true;
+                        }
+
+                        if( m.discarding === false )
+                        {
+                            discarding = ENDDISCARDING;
                         }
 
                         return updated;
@@ -114,6 +123,8 @@ function markdownToLatex( filename )
                 } );
             } );
 
+            if( discarding === NOTDISCARDING )
+            {
             if( states.length > 0 )
             {
                 var currentState = states[ states.length - 1 ];
@@ -187,7 +198,21 @@ function markdownToLatex( filename )
                 }
             }
 
-            if( !currentMatch || !currentMatch.ignore )
+                if( verbatim === false )
+                {
+                    line = line.replace(/_/g, '\\_');
+                }
+            }
+
+            if( discarding === ENDDISCARDING )
+            {
+                discarding = NOTDISCARDING;
+            }
+            else if( discarding === DISCARDING )
+            {
+                // discard the line
+            }
+            else if( !currentMatch || !currentMatch.ignore )
             {
                 line = line.replace( new RegExp( "<\!-- .* -->", 'g' ), "" );
                 newLines.push( indentation( 0 ) + line );
@@ -196,6 +221,8 @@ function markdownToLatex( filename )
 
         return newLines;
     } );
+
+    latexwrapper.createLatexWrapper( filename );
 };
 
 
@@ -205,7 +232,7 @@ function latexToMarkdown( filename )
     {
         var newLines = [];
         var currentState;
-        var codeBlock = false;
+        var verbatim = false;
 
         lines.map( function( line )
         {
@@ -217,12 +244,12 @@ function latexToMarkdown( filename )
                     var m = mappings.latexToMarkdownMappings[ regex ];
                     currentMatch = m;
 
-                    if( m.codeBlock === false )
+                    if( m.verbatim === false )
                     {
-                        codeBlock = false;
+                        verbatim = false;
                     }
 
-                    if( codeBlock === false )
+                    if( verbatim === false )
                     {
                         var updated = m.replacements ? m.replacements[ currentState ]
                             : ( m.replacement !== undefined ? m.replacement : match );
@@ -256,14 +283,15 @@ function latexToMarkdown( filename )
                         updated = match;
                     }
 
-                    if( m.codeBlock === true )
+                    if( m.verbatim === true )
                     {
-                        codeBlock = true;
+                        verbatim = true;
                     }
 
                     return updated;
                 } );
             } );
+
             if( currentMatch && currentMatch.state !== undefined )
             {
                 if( currentMatch.state.length > 0 )
@@ -280,6 +308,7 @@ function latexToMarkdown( filename )
             {
                 newLines.push( line );
             }
+
         } );
 
         return newLines;
