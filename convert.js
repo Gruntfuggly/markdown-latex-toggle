@@ -18,7 +18,7 @@ function simpleClone( object )
 function convert( sourceFilename, extension, doConversion )
 {
     var lines = fs.readFileSync( sourceFilename ).toString();
-    var newLines = doConversion( lines.split( '\n' ) ).join( '\n' );
+    var newLines = doConversion( lines.split( /\r?\n/ ) ).join( '\n' );
 
     var filePath = (sourceFilename + extension).replace(/ /g,'_');
     fs.writeFileSync( filePath, newLines, 'utf8' );
