@@ -14,17 +14,6 @@ pcompiler = require('../properties.js');
 // const vscode = require('vscode');
 // const myExtension = require('../extension');
 
-function arraysEqual(arr1, arr2) {
-    if (arr1.length !== arr2.length)
-        return false;
-    for (var i = arr1.length; i--;) {
-        if (arr1[i] !== arr2[i])
-            return false;
-    }
-
-    return true;
-}
-
 
 // Defines a Mocha test suite to group tests of similar kind together
 suite("Extension Tests", function () {
@@ -38,7 +27,7 @@ suite("Extension Tests", function () {
         expectedCompiledLines = [
             ""
         ];
-        assert(arraysEqual(expectedCompiledLines, actualCompiledLines));
+        assert.deepEqual(actualCompiledLines, expectedCompiledLines);
     });
 
     test("Property Compiler - line with no properties returns same", function () {
@@ -50,7 +39,7 @@ suite("Extension Tests", function () {
         expectedCompiledLines = [
             "Fish"
         ];
-        assert(arraysEqual(expectedCompiledLines, actualCompiledLines));
+        assert.deepEqual(actualCompiledLines, expectedCompiledLines);
     });
 
     test("Property Compiler - line with property gets value", function () {
@@ -62,7 +51,7 @@ suite("Extension Tests", function () {
         expectedCompiledLines = [
             "value"
         ];
-        assert(arraysEqual(expectedCompiledLines, actualCompiledLines));
+        assert.deepEqual(actualCompiledLines, expectedCompiledLines);
     });
 
     test("Property Compiler - line with two properties gets compiled", function () {
@@ -77,7 +66,7 @@ suite("Extension Tests", function () {
         expectedCompiledLines = [
             "value1 value2"
         ];
-        assert(arraysEqual(expectedCompiledLines, actualCompiledLines));
+        assert.deepEqual(actualCompiledLines, expectedCompiledLines);
     });
 
     test("Property Compiler - second value of property gets compiled", function () {
@@ -91,7 +80,7 @@ suite("Extension Tests", function () {
         expectedCompiledLines = [
             "value1 value2"
         ];
-        assert(arraysEqual(expectedCompiledLines, actualCompiledLines));
+        assert.deepEqual(actualCompiledLines, expectedCompiledLines);
     });
 
     test("Property Compiler - all values of property get compiled with no separator", function () {
@@ -105,7 +94,7 @@ suite("Extension Tests", function () {
         expectedCompiledLines = [
             "value1value2"
         ];
-        assert(arraysEqual(expectedCompiledLines, actualCompiledLines));
+        assert.deepEqual(actualCompiledLines, expectedCompiledLines);
     });
 
     test("Property Compiler - all values of property get compiled with no separator (empty separator)", function () {
@@ -119,7 +108,7 @@ suite("Extension Tests", function () {
         expectedCompiledLines = [
             "value1value2"
         ];
-        assert(arraysEqual(expectedCompiledLines, actualCompiledLines));
+        assert.deepEqual(actualCompiledLines, expectedCompiledLines);
     });
 
     test("Property Compiler - all values of property get compiled with separator", function () {
@@ -133,7 +122,7 @@ suite("Extension Tests", function () {
         expectedCompiledLines = [
             "value1-value2-value3"
         ];
-        assert(arraysEqual(expectedCompiledLines, actualCompiledLines));
+        assert.deepEqual(actualCompiledLines, expectedCompiledLines);
     });
 
     test("Property Compiler - all values of property get compiled with suffix including newline", function () {
@@ -149,7 +138,7 @@ suite("Extension Tests", function () {
             "value2",
             "value3"
         ];
-        assert(arraysEqual(expectedCompiledLines, actualCompiledLines));
+        assert.deepEqual(actualCompiledLines, expectedCompiledLines);
     });
 
     test("Property Compiler - all values of property get compiled with separator including multiple newline", function () {
@@ -167,7 +156,7 @@ suite("Extension Tests", function () {
             "",
             "value3",
         ];
-        assert(arraysEqual(expectedCompiledLines, actualCompiledLines));
+        assert.deepEqual(actualCompiledLines, expectedCompiledLines);
     });
 
     test("Property Compiler - all values of property get compiled with separator having escaped backslashes", function () {
@@ -184,11 +173,25 @@ suite("Extension Tests", function () {
             "value3",
         ];
 
-        if(!arraysEqual(expectedCompiledLines, actualCompiledLines)) {
-            console.log(expectedCompiledLines);
-            console.log(actualCompiledLines);
-        }
-
-        assert(arraysEqual(expectedCompiledLines, actualCompiledLines));
+        assert.deepEqual(actualCompiledLines, expectedCompiledLines);
     });
+
+    test("Property Compiler - convert as table - vertical bar to Latex ampersand", function () {
+        line = "@@prop1[][as-table]{ \\\\hline \\n}@@";
+        properties = {
+            "prop1": ["one|two", "three|four", "five | six"]
+        };
+
+        actualCompiledLines = pcompiler.compileLine(line, properties);
+
+        expectedCompiledLines = [
+            "one & two \\hline ",
+            "three & four \\hline ",
+            "five  &  six",
+        ];
+
+        assert.deepEqual(actualCompiledLines, expectedCompiledLines);
+    });
+
+
 });
