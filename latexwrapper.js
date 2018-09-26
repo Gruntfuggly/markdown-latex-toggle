@@ -3,11 +3,6 @@ const fs = require( 'fs' );
 const path = require( 'path' );
 const pcompiler = require( './properties.js' );
 
-function basename(path)
-{
-    return path.split(/[\\/]/).pop();
-}
-
 function defaultTemplatePath()
 {
     var homedir = os.homedir();
@@ -98,7 +93,7 @@ function createLatexWrapper( sourceFilename )
     var properties = parseProperties( lines );
 
     var sourceFilenameKey = "md-source-filename";
-    properties[sourceFilenameKey] = properties[sourceFilenameKey] || [ basename(sourceFilename).replace(/ /g,'_') ];
+    properties[sourceFilenameKey] = properties[sourceFilenameKey] || [ path.basename(sourceFilename).replace(/ /g, '_') ];
 
     wrapperLines = compileLatexWrapper(properties);
 
