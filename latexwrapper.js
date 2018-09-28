@@ -92,7 +92,7 @@ function createLatexWrapper( sourceFilename )
     var lines = fs.readFileSync( sourceFilename ).toString().split( /\r?\n/ );
     var properties = parseProperties( lines );
 
-    var sourceFilenameKey = "md-source-filename";
+    var sourceFilenameKey = "__md-source-filename";
     properties[sourceFilenameKey] = properties[sourceFilenameKey] || [ path.basename(sourceFilename).replace(/ /g, '_') ];
 
     wrapperLines = compileLatexWrapper(properties);
