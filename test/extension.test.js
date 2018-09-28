@@ -286,5 +286,20 @@ suite("Extension Tests", function () {
         assert.deepEqual(actualCompiledLines, expectedCompiledLines);
     });
 
+    test("Property Compiler - no-escaping option doesn't escape special chars", function () {
+        line = "@@prop!no-escaping!@@";
+        properties = {
+            "prop": ["& % $ # { } _ ~ ^ \\ |"]
+        };
+
+        actualCompiledLines = pcompiler.compileLine(line, properties);
+
+        expectedCompiledLines = [
+            "& % $ # { } _ ~ ^ \\ |"
+        ];
+
+        assert.deepEqual(actualCompiledLines, expectedCompiledLines);
+    });
+
 
 });
