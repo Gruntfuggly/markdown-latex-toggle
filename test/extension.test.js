@@ -301,5 +301,35 @@ suite("Extension Tests", function () {
         assert.deepEqual(actualCompiledLines, expectedCompiledLines);
     });
 
+    test("Property Compiler - reference definitions converted to LaTeX command", function () {
+        line = "@@prop@@";
+        properties = {
+            "prop": ["xxx [[ABC]] zzz"]
+        };
+
+        actualCompiledLines = pcompiler.compileLine(line, properties);
+
+        expectedCompiledLines = [
+            "xxx \\docref{ABC} zzz"
+        ];
+
+        assert.deepEqual(actualCompiledLines, expectedCompiledLines);
+    });
+
+    test("Property Compiler - reference definitions not converted with !no-escaping!", function () {
+        line = "@@prop!no-escaping!@@";
+        properties = {
+            "prop": ["xxx [[ABC]] zzz"]
+        };
+
+        actualCompiledLines = pcompiler.compileLine(line, properties);
+
+        expectedCompiledLines = [
+            "xxx [[ABC]] zzz"
+        ];
+
+        assert.deepEqual(actualCompiledLines, expectedCompiledLines);
+    });
+
 
 });

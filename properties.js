@@ -16,6 +16,8 @@ function compileLine(line, properties)
                     p = p.replace(/\\~/g, "\\textasciitilde");
                     p = p.replace(/\^/g, "\\textasciicircum");
                     p = p.replace(/\\\\/g, "\\textbackslash");
+                    // make sure this is done last, so as not to escape replacement string!
+                    p = p.replace(/\[\[(.+?)\]\]/g, "\\docref{$1}");
                     return p;
                 });
             }

@@ -34,8 +34,9 @@ var markdownToLatexMappings =
     "\\`(.*?)\\`": { replacement: "\\texttt{\$1}", groups: [ 1 ], simple: true },
     "^---$": { replacement: "\\rule{\\textwidth}{1pt}" },
     "^===$": { replacement: "\\rule{\\textwidth}{2pt}" },
-    "\\[([\\d\\.]+\\.)]\\(\\)": { replacement: "\\ref{\$1}", groups: [ 1 ], simple: true },
-    "\\[(.+?)]\\((.*?)\\)": { replacement: "\\href{\$2}{\$1}", groups: [ 1, 2 ], simple: true }
+    "\\[([\\d\\.]+\\.?)\\]\\(\\)": { replacement: "section \\ref{\$1}", groups: [ 1 ], simple: true },
+    "\\[([A-Za-z][A-Za-z0-9]*?)\\]\\(\\)": { replacement: "ref \\ref{\$1}", groups: [ 1 ], simple: true },
+     "\\[(.+?)\\]\\(([^)]+?)\\)": { replacement: "\\href{\$2}{\$1}", groups: [ 1, 2 ], simple: true }
 };
 
 var latexToMarkdownMappings =
@@ -72,7 +73,7 @@ var latexToMarkdownMappings =
     "\\\\texttt\\{(.*?)\\}": { replacement: "`\$1`", groups: [ 1 ] },
     "\\\\rule\\{\\\\textwidth\\}\\{1pt\\}": { replacement: "---" },
     "\\\\rule\\{\\\\textwidth\\}\\{2pt\\}": { replacement: "===" },
-    "\\\\ref\\{(.*?)\\}": { replacement: "[\$1]()", groups: [ 1 ], simple: true },
+    "(section|ref) \\\\ref\\{(.*?)\\}": { replacement: "\$1 [\$2]()", groups: [ 1, 2 ], simple: true },
     "\\\\href\\{(.*?)\\}\\{(.*?)\\}": { replacement: "[\$2](\$1)", groups: [ 1, 2 ], simple: true },
     "\\\\(tiny|scriptsize|footnotesize|small|normalsize|large|LARGE|huge|HUGE)": { replacement: "<!-- text:\$1 -->", groups: [ 1 ], simple: true },
     "\\\\pagebreak": { replacement: "<!-- break -->", simple: true },
