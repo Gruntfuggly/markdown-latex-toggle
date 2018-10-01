@@ -85,7 +85,7 @@ suite("Extension Tests", function () {
         actualCompiledLines = pcompiler.compileLine(line, properties);
 
         expectedCompiledLines = [
-            "@@ property prop is undefined! @@"
+            "@@ prop is undefined! @@"
         ];
         assert.deepEqual(actualCompiledLines, expectedCompiledLines);
     });
@@ -326,6 +326,45 @@ suite("Extension Tests", function () {
 
         expectedCompiledLines = [
             "xxx [[ABC]] zzz"
+        ];
+
+        assert.deepEqual(actualCompiledLines, expectedCompiledLines);
+    });
+
+    test("Property Compiler - use 'else' value if property is not set", function () {
+        line = "@@prop?{nothing}@@";
+        properties = {};
+
+        actualCompiledLines = pcompiler.compileLine(line, properties);
+
+        expectedCompiledLines = [
+            "nothing"
+        ];
+
+        assert.deepEqual(actualCompiledLines, expectedCompiledLines);
+    });
+
+    test("Property Compiler - default text if property[1] is not set", function () {
+        line = "@@prop[1]@@";
+        properties = { "prop" : [ "first" ] };
+
+        actualCompiledLines = pcompiler.compileLine(line, properties);
+
+        expectedCompiledLines = [
+            "@@ prop[1] is undefined! @@"
+        ];
+
+        assert.deepEqual(actualCompiledLines, expectedCompiledLines);
+    });
+
+    test("Property Compiler - use 'else' value if property[1] is not set", function () {
+        line = "@@prop[1]?{nothing}@@";
+        properties = { "prop" : [ "first" ] };
+
+        actualCompiledLines = pcompiler.compileLine(line, properties);
+
+        expectedCompiledLines = [
+            "nothing"
         ];
 
         assert.deepEqual(actualCompiledLines, expectedCompiledLines);

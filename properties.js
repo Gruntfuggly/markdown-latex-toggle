@@ -1,6 +1,6 @@
 function compileLine(line, properties)
 {
-    compiledLine = line.replace( /@@(.*?)(\[(.*?)\])?(\!.*?\!)?(\{(.*?)\})?@@/g, function (match, varName, arraySpec, arrayIndex, options, interSpec, inter) {
+    compiledLine = line.replace( /@@(.*?)(\[(.*?)\])?(\!.*?\!)?(\{(.*?)\})?(\?\{(.*?)\})?@@/g, function (match, varName, arraySpec, arrayIndex, options, interSpec, inter, elsespec, elsetext) {
         if (varName in properties) {
             property = properties[varName];
 
@@ -59,11 +59,26 @@ function compileLine(line, properties)
                     });
                 }
 
-                compiledProp = property[propIndex];
+                if (property[propIndex] === undefined) {
+                    if (elsetext) {
+                        compiledProp = elsetext;
+                    }
+                    else {
+                        compiledProp = "@@ " + varName + "[" + propIndex + "] is undefined! @@";
+                    }
+                }
+                else {
+                    compiledProp = property[propIndex];
+                }
             }
         }
         else {
-            compiledProp = "@@ property " + varName + " is undefined! @@";
+            if (elsetext) {
+                compiledProp = elsetext;
+            }
+            else {
+                compiledProp = "@@ " + varName + " is undefined! @@";
+            }
         }
         return compiledProp;
     } );
