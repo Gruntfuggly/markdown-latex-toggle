@@ -164,6 +164,7 @@ function markdownToLatex( filename )
                         var format = "|";
                         cells.map( function( cell, index )
                         {
+                            format += ">{\\raggedright\\arraybackslash}";
                             format += ( index === widest ? "X" : "l" ) + "|";
                         } );
 
