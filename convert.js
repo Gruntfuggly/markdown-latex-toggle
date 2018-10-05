@@ -172,6 +172,7 @@ function markdownToLatex( filename )
                     if( states.length > 0 )
                     {
                         currentState = states[ states.length - 1 ];
+                        currentTable = undefined;
                     }
                 }
             }
