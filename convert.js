@@ -3,6 +3,17 @@ var mappings = require( './mappings.js' );
 var fs = require( 'fs' );
 var path = require( 'path' );
 
+var fontSizes = [
+    "tiny",
+    "scriptsize",
+    "footnotesize",
+    "small",
+    "normalsize",
+    "large",
+    "LARGE",
+    "huge",
+    "HUGE" ];
+
 function simpleClone( object )
 {
     var newObject = ( object instanceof Array ) ? [] : {};
@@ -92,7 +103,19 @@ function markdownToLatex( filename )
                             }
                             var updated = m.replacement !== undefined ? m.replacement : match;
                             var groups = arguments;
-                            if( m.groups )
+                            if( m.fontSize )
+                            {
+                                var scale = parseInt( groups[ 1 ] );
+                                if( scale != NaN && scale >= -4 && scale <= 4 )
+                                {
+                                    updated = updated.replace( new RegExp( '\\$1', 'g' ), fontSizes[ scale + 4 ] );
+                                }
+                                else
+                                {
+                                    updated = updated.replace( new RegExp( '\\$1', 'g' ), groups[ 1 ] );
+                                }
+                            }
+                            else if( m.groups )
                             {
                                 m.groups.map( function( group )
                                 {
@@ -112,8 +135,6 @@ function markdownToLatex( filename )
                                 currentMatch.elements = match.split( '|' ).filter( function( e ) { return e.length > 0; } );
                                 updated = currentMatch.elements.join( " & " ) + "\\\\ \\hline";
                             }
-
-
                         }
                         else
                         {

@@ -9,7 +9,7 @@ var markdownToLatexMappings =
     "^<\\!-- latex:end -->$": { replacement: "% latex:end", verbatim: false },
     "^<\\!-- together:begin -->$": { replacement: "\\vbox{%together", simple: true },
     "^<\\!-- together:end -->$": { replacement: "}%together", simple: true },
-    "^<\\!-- text:(.*?) -->$": { replacement: "\\\$1", groups: [ 1 ], simple: true },
+    "^<\\!-- text:(.*?) -->$": { replacement: "\\\$1", simple: true, fontSize: true },
     "^```(.+)$": { replacement: "\\mdcomment{$1} \\begin{verbatim}", verbatim: true, groups: [ 1 ] },
     "^```$": { replacement: "\\end{verbatim}", verbatim: false },
     "^#\\s+([\\d\\.]+\\.)\\s+(.*)$": { replacement: "\\chapter{\$2}\\label{\$1}", groups: [ 1, 2 ] },
