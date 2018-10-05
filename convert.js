@@ -1,6 +1,7 @@
 var latexwrapper = require( './latexwrapper.js' );
 var mappings = require( './mappings.js' );
 var fs = require( 'fs' );
+var path = require( 'path' );
 
 function simpleClone( object )
 {
@@ -20,7 +21,11 @@ function convert( sourceFilename, extension, doConversion )
     var lines = fs.readFileSync( sourceFilename ).toString();
     var newLines = doConversion( lines.split( /\r?\n/ ) ).join( '\n' );
 
-    var filePath = (sourceFilename + extension).replace(/ /g,'_');
+    var filePath = ( sourceFilename + extension );
+
+    // Replace spaces with underscores in the filename only
+    var filePath = path.join( path.dirname( filePath ), path.basename( filePath ).replace( / /g, '_' ) );
+
     fs.writeFileSync( filePath, newLines, 'utf8' );
 };
 
