@@ -99,7 +99,10 @@ function createLatexWrapper( sourceFilename )
 
     var wrapperFilename = sourceFilename + '.wrapper.tex';
 
-    writeLatexWrapper(wrapperFilename, wrapperLines);
+    if( wrapperLines )
+    {
+        writeLatexWrapper( wrapperFilename, wrapperLines );
+    }
 };
 
 
