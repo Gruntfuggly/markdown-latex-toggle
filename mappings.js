@@ -27,16 +27,16 @@ var markdownToLatexMappings =
     "^<img (alt|title)=\"(.*)\" src=\"(.*)\.png\"/>$": { replacement: "\\begin{figure}[H]\\includegraphics" + mdToLatexImgAttr + "{\$3}\\caption{\$2}\\end{figure}", groups: [ 2, 3 ] },
     "^\\|([:-]*\\|){1,}$": { ignore: true, state: "tabularx" },
     "^\\|(.*\\|){1,}$": { state: "tabularx" },
-    "\\s\\*\\*(.*?)\\*\\*\\s": { replacement: "\\hphantom{ }\\textbf{\$1}\\hphantom{ }", groups: [ 1 ], simple: true },
-    "\\s__(.*?)__\\s": { replacement: "\\hphantom{ }\\textbf{\$1}\\hphantom{ }", groups: [ 1 ], simple: true },
-    "\\s\\*(.*?)\\*\\s": { replacement: "\\hphantom{ }\\textit{\$1}\\hphantom{ }", groups: [ 1 ], simple: true },
-    "\\s_(.*?)_\\s": { replacement: "\\hphantom{ }\\textit{\$1}\\hphantom{ }", groups: [ 1 ], simple: true },
+    "(^|\\s)\\*\\*(.*?)\\*\\*($|\\s)": { replacement: "\$1\\textbf{\$2}\$1", groups: [ 1, 2, 3 ], simple: true },
+    "(^|\\s)__(.*?)__($|\\s)": { replacement: "\$1\\textbf{\$2}\$3", groups: [ 1, 2, 3 ], simple: true },
+    "(^|\\s)\\*(.*?)\\*($|\\s)": { replacement: "\$1\\textit{\$2}\$3", groups: [ 1, 2, 3 ], simple: true },
+    "(^|\\s)_(.*?)_($|\\s)": { replacement: "\$1\\textit{\$2}\$3", groups: [ 1, 2, 3 ], simple: true },
     "\\`(.*?)\\`": { replacement: "\\texttt{\$1}", groups: [ 1 ], simple: true },
     "^---$": { replacement: "\\rule{\\textwidth}{1pt}" },
     "^===$": { replacement: "\\rule{\\textwidth}{2pt}" },
     "\\[([\\d\\.]+\\.?)\\]\\(\\)": { replacement: "section \\ref{\$1}", groups: [ 1 ], simple: true },
     "\\[([A-Za-z][A-Za-z0-9]*?)\\]\\(\\)": { replacement: "ref \\ref{\$1}", groups: [ 1 ], simple: true },
-     "\\[(.+?)\\]\\(([^)]+?)\\)": { replacement: "\\href{\$2}{\$1}", groups: [ 1, 2 ], simple: true }
+    "\\[(.+?)\\]\\(([^)]+?)\\)": { replacement: "\\href{\$2}{\$1}", groups: [ 1, 2 ], simple: true }
 };
 
 var latexToMarkdownMappings =
@@ -70,7 +70,10 @@ var latexToMarkdownMappings =
     "\\\\end\\{tabularx\\}": { ignore: true, state: "" },
     "\\\\hphantom\\{ \\}\\\\textit\\{(.*?)\\}\\\\hphantom\\{ \\}": { replacement: " *\$1* ", groups: [ 1 ] },
     "\\\\hphantom\\{ \\}\\\\textbf\\{(.*?)\\}\\\\hphantom\\{ \\}": { replacement: " **\$1** ", groups: [ 1 ] },
+    "\\\\textit\\{(.*?)\\}": { replacement: "*\$1*", groups: [ 1 ] },
+    "\\\\textbf\\{(.*?)\\}": { replacement: "**\$1**", groups: [ 1 ] },
     "\\\\texttt\\{(.*?)\\}": { replacement: "`\$1`", groups: [ 1 ] },
+    "\\\\hphantom\\{ \\}": { replacement: " ", simple: true },
     "\\\\rule\\{\\\\textwidth\\}\\{1pt\\}": { replacement: "---" },
     "\\\\rule\\{\\\\textwidth\\}\\{2pt\\}": { replacement: "===" },
     "(section|ref) \\\\ref\\{(.*?)\\}": { replacement: "\$1 [\$2]()", groups: [ 1, 2 ], simple: true },

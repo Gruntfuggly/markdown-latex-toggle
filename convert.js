@@ -86,7 +86,7 @@ function markdownToLatex( filename )
 
                         if( discarding === NOTDISCARDING && verbatim === false )
                         {
-                            if( typeof ( g1 ) === "string" && g2 && g1.replace( /\s/g, '' ) === "" )
+                            if( currentMatch && typeof ( g1 ) === "string" && g2 && g1.replace( /\s/g, '' ) === "" )
                             {
                                 currentMatch.level = parseInt( g1.length / 4 );
                             }
@@ -96,7 +96,15 @@ function markdownToLatex( filename )
                             {
                                 m.groups.map( function( group )
                                 {
-                                    updated = updated.replace( new RegExp( '\\$' + group, 'g' ), groups[ group ] );
+                                    var replacement = groups[ group ];
+                                    if( m.simple )
+                                    {
+                                        if( replacement.length > 0 && typeof ( replacement ) === "string" && replacement.replace( /\s/g, '' ) === "" )
+                                        {
+                                            replacement = "\\hphantom{ }"
+                                        }
+                                    }
+                                    updated = updated.replace( new RegExp( '\\$' + group, 'g' ), replacement );
                                 } );
                             }
                             if( m.state === 'tabularx' )
