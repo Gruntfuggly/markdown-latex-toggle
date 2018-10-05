@@ -124,7 +124,7 @@ function markdownToLatex( filename )
                                     {
                                         if( replacement.length > 0 && typeof ( replacement ) === "string" && replacement.replace( /\s/g, '' ) === "" )
                                         {
-                                            replacement = "\\hphantom{ }"
+                                            replacement = "\\mdspace{ }"
                                         }
                                     }
                                     updated = updated.replace( new RegExp( '\\$' + group, 'g' ), replacement );
