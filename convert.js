@@ -159,83 +159,84 @@ function markdownToLatex( filename )
 
             if( discarding === NOTDISCARDING )
             {
-            if( states.length > 0 )
-            {
-                var currentState = states[ states.length - 1 ];
-                while( states.length > 0 &&
-                    ( currentMatch === undefined ||
-                        ( currentMatch && currentMatch.state === undefined ) ||
-                        ( currentMatch.level < currentState.level ) ) )
+                if( states.length > 0 )
                 {
-                    newLines.push( indentation( -1 ) + "\\end{" + currentState.state + "}" );
-                    states.pop();
-                    if( states.length > 0 )
+                    var currentState = states[ states.length - 1 ];
+                    while( states.length > 0 &&
+                        ( currentMatch === undefined ||
+                            ( currentMatch && currentMatch.state === undefined ) ||
+                            ( currentMatch.level < currentState.level ) ) )
                     {
-                        currentState = states[ states.length - 1 ];
+                        newLines.push( indentation( -1 ) + "\\end{" + currentState.state + "}" );
+                        states.pop();
+                        if( states.length > 0 )
+                        {
+                            currentState = states[ states.length - 1 ];
+                        }
+                        currentTable = undefined;
                     }
                 }
-            }
 
-            if( currentMatch && currentMatch.state )
-            {
-                var lastState = states.length > 0 ? states[ states.length - 1 ] : undefined;
-                if( !lastState || lastState.state !== currentMatch.state || currentMatch.level > lastState.level )
+                if( currentMatch && currentMatch.state )
                 {
-                    if( currentMatch.state === 'tabularx' )
+                    var lastState = states.length > 0 ? states[ states.length - 1 ] : undefined;
+                    if( !lastState || lastState.state !== currentMatch.state || currentMatch.level > lastState.level )
                     {
-                        var cells = currentMatch.elements;
-                        var widest = 0;
-                        var widestWidth = 0;
-                        cells = cells.map( function( cell, index )
+                        if( currentMatch.state === 'tabularx' )
                         {
-                            if( cell.length > widestWidth )
+                            var cells = currentMatch.elements;
+                            var widest = 0;
+                            var widestWidth = 0;
+                            cells = cells.map( function( cell, index )
                             {
-                                widestWidth = cell.length;
-                                widest = index;
-                            }
-                            return "\\textbf{" + cell.trim() + "}";
-                        } );
-                        var format = "|";
-                        cells.map( function( cell, index )
-                        {
-                            format += ">{\\raggedright\\arraybackslash}";
-                            format += ( index === widest ? "X" : "l" ) + "|";
-                        } );
+                                if( cell.length > widestWidth )
+                                {
+                                    widestWidth = cell.length;
+                                    widest = index;
+                                }
+                                return "\\textbf{" + cell.trim() + "}";
+                            } );
+                            var format = "|";
+                            cells.map( function( cell, index )
+                            {
+                                format += ">{\\raggedright\\arraybackslash}";
+                                format += ( index === widest ? "X" : "l" ) + "|";
+                            } );
 
-                        currentTable = {
-                            header: "\\begin{tabularx}{\\textwidth}{" + format + "}\\hline\\rowcolor[gray]{0.9}\n" + cells.join( " & " ) + "\\\\ \\hline"
+                            currentTable = {
+                                header: "\\begin{tabularx}{\\textwidth}{" + format + "}\\hline\\rowcolor[gray]{0.9}\n" + cells.join( " & " ) + "\\\\ \\hline"
+                            }
+                            newLines.push( currentTable.header );
+                            currentMatch.ignore = true;
                         }
+                        else
+                        {
+                            newLines.push( indentation( 0 ) + "\\begin{" + currentMatch.state + "}" );
+                        }
+                        states.push( { state: currentMatch.state, level: currentMatch.level } );
+                    }
+
+                }
+
+                var breakPoint = line.indexOf( "<!-- break -->" );
+
+                if( breakPoint > -1 )
+                {
+                    if( currentTable )
+                    {
+                        newLines.push( "\\end{tabularx}\n" );
+                        newLines.push( "% break" );
                         newLines.push( currentTable.header );
-                        currentMatch.ignore = true;
                     }
                     else
                     {
-                        newLines.push( indentation( 0 ) + "\\begin{" + currentMatch.state + "}" );
+                        newLines.push( "\\pagebreak" );
                     }
-                    states.push( { state: currentMatch.state, level: currentMatch.level } );
                 }
-
-            }
-
-            var breakPoint = line.indexOf( "<!-- break -->" );
-
-            if( breakPoint > -1 )
-            {
-                if( currentTable )
-                {
-                    newLines.push( "\\end{tabularx}\n" );
-                    newLines.push( "% break" );
-                    newLines.push( currentTable.header );
-                }
-                else
-                {
-                    newLines.push( "\\pagebreak" );
-                }
-            }
 
                 if( verbatim === false )
                 {
-                    line = line.replace(/_/g, '\\_');
+                    line = line.replace( /_/g, '\\_' );
                 }
             }
 
