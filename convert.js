@@ -42,7 +42,8 @@ function convert( sourceFilename, extension, doConversion )
 
 function markdownToLatex( filename )
 {
-    convert( filename, ".tex", function( lines )
+    const suffix = "-content";
+    convert( filename, suffix + ".tex", function( lines )
     {
         function indentation( adjustment )
         {
@@ -258,7 +259,7 @@ function markdownToLatex( filename )
         return newLines;
     } );
 
-    latexwrapper.createLatexWrapper( filename );
+    latexwrapper.createLatexWrapper( filename, suffix );
 };
 
 
