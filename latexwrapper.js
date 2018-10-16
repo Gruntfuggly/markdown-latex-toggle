@@ -87,17 +87,17 @@ function writeLatexWrapper(filename, lines)
     fs.writeFileSync(filename, lines.join('\n')+'\n');
 }
 
-function createLatexWrapper( sourceFilename )
+function createLatexWrapper( sourceFilename, contentSuffix )
 {
     var lines = fs.readFileSync( sourceFilename ).toString().split( /\r?\n/ );
     var properties = parseProperties( lines );
 
     var sourceFilenameKey = "__md-source-filename";
-    properties[sourceFilenameKey] = properties[sourceFilenameKey] || [ path.basename(sourceFilename).replace(/ /g, '_') ];
+    properties[sourceFilenameKey] = properties[sourceFilenameKey] || [ path.basename(sourceFilename + contentSuffix).replace(/ /g, '_') ];
 
     wrapperLines = compileLatexWrapper(properties);
 
-    var wrapperFilename = sourceFilename + '.wrapper.tex';
+    var wrapperFilename = sourceFilename + '.tex';
 
     if( wrapperLines )
     {
