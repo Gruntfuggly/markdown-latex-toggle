@@ -5,6 +5,7 @@ var markdownToLatexMappings =
 {
     "\\!properties-begin\\!": { discarding: true },
     "\\!properties-end\\!": { discarding: false },
+    "%": { replacement: "\\%", simple: true },
     "^<\\!-- latex:begin -->$": { replacement: "% latex:begin", verbatim: true },
     "^<\\!-- latex:end -->$": { replacement: "% latex:end", verbatim: false },
     "^<\\!-- together:begin -->$": { replacement: "\\vbox{%together", simple: true },
@@ -78,7 +79,8 @@ var latexToMarkdownMappings =
     "\\\\href\\{(.*?)\\}\\{(.*?)\\}": { replacement: "[\$2](\$1)", groups: [ 1, 2 ], simple: true },
     "\\\\(tiny|scriptsize|footnotesize|small|normalsize|large|LARGE|huge|HUGE)": { replacement: "<!-- text:\$1 -->", groups: [ 1 ], simple: true },
     "\\\\pagebreak": { replacement: "<!-- break -->", simple: true },
-    "^\% break$": { replacement: "", simple: true, state: "" }
+    "^\% break$": { replacement: "", simple: true, state: "" },
+    "\\\\%": { replacement: "%", simple: true }
 };
 
 module.exports.markdownToLatexMappings = markdownToLatexMappings;
