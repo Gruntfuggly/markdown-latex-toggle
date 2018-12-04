@@ -35,6 +35,9 @@ var markdownToLatexMappings =
     "\\`(.*?)\\`": { replacement: "\\texttt{\$1}", groups: [ 1 ], simple: true },
     "^---$": { replacement: "\\rule{\\textwidth}{1pt}" },
     "^===$": { replacement: "\\rule{\\textwidth}{2pt}" },
+    "&gt;": { replacement: "$>$", simple: true },
+    "&lt;": { replacement: "$<$", simple: true },
+    "\"(.*?)\"": { replacement: "``\$1\"", groups: [ 1 ], simple: true },
     "\\[([\\d\\.]+\\.?)\\]\\(\\)": { replacement: "\\ref{\$1}", groups: [ 1 ], simple: true },
     "\\[([A-Za-z][A-Za-z0-9]*?)\\]\\(\\)": { replacement: "ref \\ref{\$1}", groups: [ 1 ], simple: true },
     "\\[(.+?)\\]\\(([^)]+?)\\)": { replacement: "\\href{\$2}{\$1}", groups: [ 1, 2 ], simple: true }
