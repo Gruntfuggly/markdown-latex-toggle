@@ -1,4 +1,4 @@
-var latexwrapper = require( './latexwrapper.js' );
+var latexWrapper = require( './latexwrapper.js' );
 var mappings = require( './mappings.js' );
 var fs = require( 'fs' );
 var path = require( 'path' );
@@ -27,20 +27,25 @@ function simpleClone( object )
     } return newObject;
 };
 
-function convert( sourceFilename, extension, doConversion )
+function convert( sourceFilename, extension, doConversion, log )
 {
+    log( "Reading:" + sourceFilename + "..." );
     var lines = fs.readFileSync( sourceFilename ).toString();
+    log( "Converting..." );
     var newLines = doConversion( lines.split( /\r?\n/ ) ).join( '\n' );
 
     var filePath = ( sourceFilename + extension );
 
+    log( "Replacing spaces in filename..." );
+
     // Replace spaces with underscores in the filename only
     var filePath = path.join( path.dirname( filePath ), path.basename( filePath ).replace( / /g, '_' ) );
 
+    log( "Writing converted document..." );
     fs.writeFileSync( filePath, newLines, 'utf8' );
 };
 
-function markdownToLatex( filename )
+function markdownToLatex( filename, log )
 {
     const suffix = "-content";
     convert( filename, suffix + ".tex", function( lines )
@@ -257,13 +262,16 @@ function markdownToLatex( filename )
         } );
 
         return newLines;
-    } );
+    }, log );
 
-    latexwrapper.createLatexWrapper( filename, suffix );
+    log( "Creating latex wrapper..." );
+    latexWrapper.createLatexWrapper( filename, suffix, log );
+
+    log( "Finished." );
 };
 
 
-function latexToMarkdown( filename )
+function latexToMarkdown( filename, log )
 {
     convert( filename, ".md", function( lines )
     {

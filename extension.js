@@ -3,12 +3,14 @@ var convert = require( './convert.js' );
 
 function activate( context )
 {
+    var outputChannel = vscode.window.createOutputChannel( 'Markdown To Latex' );
+
     context.subscriptions.push( vscode.commands.registerCommand( 'markdown-latex-toggle.markdown-to-latex', function()
     {
         var editor = vscode.window.activeTextEditor;
         var document = editor.document;
 
-        convert.markdownToLatex( document.uri.fsPath );
+        convert.markdownToLatex( document.uri.fsPath, outputChannel.appendLine );
     } ) );
 
 
@@ -17,7 +19,7 @@ function activate( context )
         var editor = vscode.window.activeTextEditor;
         var document = editor.document;
 
-        convert.latexToMarkdown( document.uri.fsPath );
+        convert.latexToMarkdown( document.uri.fsPath, outputChannel.appendLine );
     } ) );
 }
 
