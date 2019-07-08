@@ -16,8 +16,10 @@ function compileLine(line, properties)
                     p = p.replace(/\\~/g, "\\textasciitilde");
                     p = p.replace(/\^/g, "\\textasciicircum");
                     p = p.replace(/\\\\/g, "\\textbackslash");
-                    // make sure this is done last, so as not to escape replacement string!
-                    p = p.replace(/\[\[(.+?)\]\]/g, "\\docref{$1}");
+                    // make sure these are done last, so as not to escape replacement string!
+                    p = p.replace( /\[\[(.+?)\]\]/g, "\\docref{$1}" );
+                    p = p.replace( /\[([A-Za-z][A-Za-z0-9-]*?)\]\(\)/g, "[\\ref{$1}]" );
+                    p = p.replace( /\[([\d\.]+\.?)\]\(\)/g, "section \\ref{$1}" );
                     return p;
                 });
             }
